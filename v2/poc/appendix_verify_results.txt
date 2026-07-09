@@ -1,0 +1,14 @@
+[C1] E[L]=1.369962 (target 1.37)  Var=0.343637 vs s^2(e^s2-1)=0.343576  E|L-s|=0.445049 <= bound 0.586153  OK
+[C2] N= 20 M= 6.0 sig=0.20:  forward err=2.22e-16  W1(eta,rho)=0.03169 <= bound 0.51004  OK
+[C2] N= 60 M= 8.0 sig=0.08:  forward err=4.44e-16  W1(eta,rho)=0.00555 <= bound 0.21664  OK
+[C2] N=200 M=10.0 sig=0.03:  forward err=0.00e+00  W1(eta,rho)=0.00082 <= bound 0.08120  OK
+[C3] fibre mean 1.9: forward err=0.00e+00  W1=0.00463 <= bound 0.24506  OK
+[E1] level  |u0 - bisection IV|      max 7.77e-16   OK
+[E4] skew   |u1 - FD(IV)|            max 4.03e-07   OK
+[E4] curv   |u2 - FD(IV)|            max 7.45e-06   OK
+[E2] dC_mix sum vs FD                max 2.13e-07   OK
+[E2] d2C_mix sum vs FD               max 9.09e-06   OK
+[E3] BS refs (dC,d2C,V,Vx,Vu) vs FD  max 9.97e-07   OK
+[A1] pricing-map entry vs integral   |diff|=1.35e-10   OK
+[A1] CDF formula vs integral         |diff|=7.86e-12   OK
+wall 3.6s

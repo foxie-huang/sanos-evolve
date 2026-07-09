@@ -1,0 +1,22 @@
+{
+  "sample": "2015-2023",
+  "window": 63,
+  "n_test": 1089,
+  "baseline": "cross_strike_hull_white",
+  "rmse": {
+    "model": 0.5425002720773787,
+    "bench": 0.5021958318982085
+  },
+  "encompassing_verdict": "NEITHER significant (inconclusive)",
+  "hedging_var_vs_HWbaseline": {
+    "f_model": 0.9381040375022324,
+    "f_bench": 1.0,
+    "atm_MV": 1.0518776441569246,
+    "const": 0.8969930752261551,
+    "persistence": 1.3736163028914763,
+    "oracle": 0.685066736462357,
+    "black": 2.62083356059297,
+    "sticky_delta": 6.120624974910495
+  },
+  "hedging_dm_model_vs_HW_p": 0.19363458117062124
+}

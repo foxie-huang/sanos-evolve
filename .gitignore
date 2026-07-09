@@ -1,0 +1,30 @@
+# byte-compiled / caches
+__pycache__/
+*.py[cod]
+.orats_cache/
+.target_cache/
+.ndx_cache/
+*.npz
+*.npy
+.DS_Store
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+
+# editor / backups
+*.bak
+*.bak-*
+*.swp
+
+# proprietary data — never commit
+*.csv
+*.parquet
+*.h5

@@ -1,0 +1,20 @@
+CPU: Apple M4 Max | numpy 2.4.1 
+
+=== KERNEL build + propagation (closed-form GM, no MC/PDE) ===
+  kernel construction (precompute V,d,P)             293.042 us   (median/50)
+  one step: propagate 240->18000 + recompress->240     1.700 ms   (median/200)
+  full 1y density (52 steps, nk=16, 1 regime)         88.392 ms   (median/30)
+
+=== READOUT (closed-form: pricing, ATM vol/skew, SSR -- no re-sim) ===
+  SSR + ATM vol + skew @1y (all 15 regimes)            1.677 s    (median/10)
+  observables @4 maturities (=1 calibration eval)      3.654 s    (median/10)
+
+=== DYNAMICS CALIBRATION (9 knobs -> SSR/vol/skew term structure) ===
+  full 9-knob fit: 28 evals, 598.17 s, final cost 11.5
+
+=== STATICS: SANOS convex LP on the real SPX chain ===
+  1 expiry LP solve (cvxpy/CLARABEL, N=332)          873.355 ms   (median/20)
+  full chain: 8 expiries in 5165.2 ms  (645.7 ms/expiry)
+  (note: cvxpy canonicalisation dominates; a raw LP solver would be faster)
+
+DONE.
