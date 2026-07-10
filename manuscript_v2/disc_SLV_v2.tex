@@ -88,44 +88,44 @@ the SSR-consistent delta cuts realised hedging variance $27$--$47\%$ below the B
 An equity-index volatility surface poses two distinct problems. The \emph{static}
 problem is to fit, at each listed maturity, a risk-neutral marginal that reprices the
 quoted vanillas within bid--ask and is free of butterfly and calendar arbitrage. The
-\emph{dynamic} problem is to say how that surface moves when the spot moves. This smile
-dynamics governs forward-starting products, path-dependent exotics, and hedge ratios,
-and solving the static problem does not solve it.
+\emph{dynamic} problem is to say how that surface moves when the spot moves. That smile
+dynamics governs forward-starting products, path-dependent exotics, and hedge ratios. Solving the
+static problem does not solve it.
 
 \paragraph{Statics: marginals are local volatility.}
 By Dupire's formula~\cite{dupire1994}, a complete set of arbitrage-free marginals across
 maturities \emph{is} the local-volatility content of the surface. The local variance
 $\sigma_{\mathrm{LV}}^2(K,T)=\partial_T C/(\tfrac12 K^2\partial_{KK}C)$ depends only on the
-marginals, and SANOS~\cite{buehler2026sanos} solves this static problem: it writes call
+marginals. SANOS~\cite{buehler2026sanos} solves this static problem: it writes call
 prices as weighted sums of Black--Scholes basis functions and fits the weights by a linear
 program (LP) with hard bid--ask and calendar constraints. The output is a smooth, strictly
-arbitrage-free marginal at each maturity, and with it a discrete Markov martingale whose
+arbitrage-free marginal at each maturity. It also induces a discrete Markov martingale whose
 canonical transition operator is of the rigid local-volatility type.
 
 \paragraph{Dynamics: three families, and a gap.}
 The local-volatility model implied by those marginals~\cite{dermankani1994,rubinstein1994}, however,
-has the \emph{wrong} dynamics. Its forward smiles flatten too quickly with maturity, and its
+has the \emph{wrong} dynamics. Its forward smiles flatten too quickly with maturity. And its
 skew-stickiness ratio---the SSR, the normalised co-movement of at-the-money volatility with spot
-(Section~\ref{sec:ssr})---is a rigid consequence of the static skew rather than a free target.
+(Section~\ref{sec:ssr})---is a rigid consequence of the static skew, not a free target.
 Stationary local volatility gives the linear limit $\SSR\!\to\!2$; calibrated to the empirical
 $\tau^{-1/2}$ skew it is pinned near the Doeff--Kamal value $\SSR\approx\tfrac32$~\cite{doeffkamal2012}.
 The empirical SPX term structure instead runs $1.9,\,1.45,\,1.0$ from one week to two
 years~\cite{bergomi2009,bergomi2016}.
 
 \emph{Stochastic volatility} puts the randomness in the volatility itself and produces genuine smile
-dynamics, but it pays twice. Its parametric marginals cannot reprice the vanilla smile
-exactly---Heston~\cite{heston1993} and SABR~\cite{hagan2002} miss the short-dated SPX skew---and its
-dynamics are also rigid: calibrated to the same smile, the whole family (Heston, two-factor and rough
-Bergomi~\cite{bergomi2016}) clusters on one SSR term structure, and that clustering deviates from the
+dynamics. But it pays twice. Its parametric marginals cannot reprice the vanilla smile exactly:
+Heston~\cite{heston1993} and SABR~\cite{hagan2002} miss the short-dated SPX skew. Its dynamics are
+rigid too. Calibrated to the same smile, the whole family---Heston, two-factor and rough
+Bergomi~\cite{bergomi2016}---clusters on one SSR term structure, and that cluster deviates from the
 empirical one~\cite{bourgey2024,frizgatheral2024}.
 
 \emph{Stochastic-local volatility} (SLV) restores the exact smile by multiplying a stochastic backbone
 by a local-volatility leverage, calibrated through Gy\"ongy's theorem~\cite{gyongy1986,jex1999,lipton2002}.
-The cost is that the leverage is a fixed point, solved by particle or PDE methods~\cite{guyonhl2012,ren2007}---more
-recently by optimal transport~\cite{guo2022ot} or neural SDEs~\cite{cuchiero2020}---so there is
-no closed-form transition kernel and the Greeks carry Monte-Carlo noise. And because the leverage is spent
-matching the smile, the SSR is left to the backbone and inherits its rigidity
-(Section~\ref{sec:positioning} makes the comparison precise).
+The cost is that the leverage is a fixed point, solved by particle or PDE
+methods~\cite{guyonhl2012,ren2007}, more recently by optimal transport~\cite{guo2022ot} or neural
+SDEs~\cite{cuchiero2020}. So there is no closed-form transition kernel, and the Greeks carry
+Monte-Carlo noise. And because the leverage is spent matching the smile, the SSR is left to the
+backbone and inherits its rigidity (Section~\ref{sec:positioning} makes the comparison precise).
 
 So the field offers three incomplete options: exact but static (local volatility), dynamic but
 parametric (stochastic volatility), and exact and dynamic but intractable (SLV). Missing is a kernel
@@ -133,11 +133,11 @@ that is at once tractable (closed-form), data-driven (fits any arbitrage-free sm
 dynamically controllable (the SSR a free target). SANOS-Evolve is that kernel.
 
 \paragraph{SANOS-Evolve: marginals plus a fitted kernel.}
-SANOS supplies arbitrage-free marginals $\{\mu_j\}$ but pairs them with a rigid canonical transition
-operator, and its authors leave the controllable discrete-time dynamics as an open
-direction~\cite{buehler2026sanos}. SANOS-Evolve keeps the marginals and replaces that operator with a
-fitted martingale transition kernel $\cK_j$ between consecutive marginals, carrying a latent volatility
-regime with two mean-reversion timescales:
+SANOS supplies arbitrage-free marginals $\{\mu_j\}$, but pairs them with a rigid canonical transition
+operator; its authors leave controllable discrete-time dynamics as an open
+direction~\cite{buehler2026sanos}. SANOS-Evolve keeps the marginals and replaces that operator. In its
+place we fit a martingale transition kernel $\cK_j$ between consecutive marginals, carrying a latent
+volatility regime with two mean-reversion timescales:
 \[
 \underbrace{\{\mu_j\}}_{\substack{\text{SANOS marginals}\\\text{(data-driven statics)}}}
 \;+\;
@@ -157,25 +157,24 @@ binding constraint. We nonetheless keep a parsimonious two-timescale form, which
 interpretable regimes rather than leaving them underdetermined.
 
 \emph{We know what the kernel must fit.} The smile's motion, as distinct from its shape, decomposes
-into a small basis, ordered by the order each term takes in the vol-of-vol expansion~\cite{bergomi2016}:
+into a small basis, graded by the order each term takes in the vol-of-vol expansion~\cite{bergomi2016}:
 a \emph{leverage} (spot--vol coupling, first order), a \emph{vol-of-vol} (second order), and a
 \emph{vol-of-vol skew} (third order). Each is carried across maturity by the volatility process's
-timescales, and at the short end by its roughness. The SSR is the leading coordinate---the leverage
-normalised by the static skew, $\SSR_T=-\beta_T\sqrt{T}/\mathcal S_T$ with
-$\beta_T=\dd\widehat\sigma_{\mathrm{ATM}}/\dd\log S$---so fitting it decouples the dynamic response from
-the static shape. SANOS-Evolve calibrates the first- and second-order dynamics (the SSR, a VIX-informed
+timescales, and at the short end by its roughness. The SSR is the leading coordinate: the leverage normalised by the static skew,
+$\SSR_T=-\beta_T\sqrt{T}/\mathcal S_T$ with $\beta_T=\dd\widehat\sigma_{\mathrm{ATM}}/\dd\log S$.
+Fitting it therefore decouples the dynamic response from the static shape. SANOS-Evolve calibrates the first- and second-order dynamics (the SSR, a VIX-informed
 vol-of-vol readout, and the two timescales) separately from the statics; higher-order terms are named
 extensions (Section~\ref{sec:ssr}). The variance index enters as information rather than a target: a
 soft penalty that \emph{identifies} the kernel's vol-of-vol. This is what separates the construction
 from joint SPX/VIX calibration: dispersion-constrained bridges~\cite{guyon2022} and the perturbed-OT
-coupling~\cite{che2026pot} both fit the two smiles as hard targets. A hard VIX target presumes a volatility-index \emph{options} market deep enough to
-calibrate across strikes---which among European underlyings effectively means SPX alone; VSTOXX and VXN
-options exist but trade an order of magnitude thinner, and no single name, FX pair, or crypto has a
-VIX-comparable one. A forward-variance \emph{readout}, by contrast, needs only the index level or futures
-where they exist, or the option strip's own curvature otherwise, so it identifies the vol-of-vol for far
-more underlyings (Table~\ref{tab:readout}). Reading it is therefore the general construction, of which the
-SPX$+$VIX case is the sharpest instance---the price is honest, more portable but less tightly identified
-precisely where a volatility index does exist (Section~\ref{sec:ssr}). The basis, with
+coupling~\cite{che2026pot} both fit the two smiles as hard targets. A hard VIX target presumes a volatility-index \emph{options} market deep enough to calibrate across
+strikes. Among European underlyings that effectively means SPX alone: VSTOXX and VXN options exist but
+trade an order of magnitude thinner, and no single name, FX pair, or crypto has a VIX-comparable one.
+A forward-variance \emph{readout} needs only the index level or futures where they exist, or the option
+strip's own curvature otherwise. It therefore identifies the vol-of-vol for far more underlyings
+(Table~\ref{tab:readout}). Reading it is the general construction, of which the SPX$+$VIX case is the
+sharpest instance. The price is honest: more portable, but less tightly identified precisely where a
+volatility index does exist (Section~\ref{sec:ssr}). The basis, with
 the kernel knobs (Section~\ref{sec:twoscale}) that carry each characteristic, is:
 \begin{center}\small
 \begin{tabular}{llll}
@@ -237,8 +236,7 @@ SV, stochastic volatility; OU, Ornstein--Uhlenbeck.}
 \end{enumerate}
 
 \paragraph{Related work.}
-Figure~\ref{fig:landscape} places SANOS-Evolve among transition-kernel families. The closest dynamic
-relative is regime switching: Jourdain and Zhou~\cite{jourdain2020} prove existence of a calibrated
+The closest dynamic relative is regime switching: Jourdain and Zhou~\cite{jourdain2020} prove existence of a calibrated
 regime-switching model, a special case of local-stochastic volatility in which a finite-state process,
 not the spot, carries the randomness. Our latent regime is finite-state in the same spirit, but
 two-timescale and calibrated to the SSR term structure. The fast/slow structure itself is standard
@@ -295,7 +293,7 @@ forward (martingale) normalisation, and calendar constraints~\cite{buehler2026sa
 We denote the resulting marginal law $\mu_j=\law(S_{T_j})$. By
 Breeden--Litzenberger~\cite{breeden1978},
 \eqref{eq:sanos-marg} is butterfly-arbitrage-free iff $\rho_{S,T_j}\ge 0$, which holds
-by construction, and the family $\{\mu_j\}$ is calendar-arbitrage-free iff it is
+by construction. The family $\{\mu_j\}$ is calendar-arbitrage-free iff it is
 increasing in convex order, which the SANOS LP enforces. By
 Dupire~\cite{dupire1994}, $\{\mu_j\}$ \emph{is} the local-volatility content of the
 surface.
@@ -319,7 +317,7 @@ C_j(K)=\big\langle\mu_j,(\cdot-K)^+\big\rangle
 F_j^i=F_j\,e^{\mu_j^i+\frac12(\sigma_j^i)^2},
 \label{eq:mix-price}
 \end{equation}
-with no quadrature, no PDE, and no Monte Carlo, and likewise for digitals and any payoff
+with no quadrature, no PDE, and no Monte Carlo. The same holds for digitals, and for any payoff
 with a closed-form Gaussian expectation. Because call payoffs separate measures
 (Breeden--Litzenberger), this pairing is a faithful coordinate for $\mu_j$: the mixture
 density makes the marginal matchable, and the closed-form pairing makes it readable.
@@ -345,8 +343,8 @@ SSR---the SSR-consistent $\Delta_{\SSR}$ of~\eqref{eq:ssr-delta}.
 %=============================================================================
 
 With the marginals fixed, this section defines what may move between them. We set up the
-Markov kernel on the joint spot--regime state and carve out the \emph{admissible}
-set---positive, normalised, martingale, marginal-matching---on which absence of static
+Markov kernel on the joint spot--regime state, then carve out the \emph{admissible}
+set: positive, normalised, martingale, marginal-matching. On that set, absence of static
 arbitrage is a theorem and existence is Strassen's. Every dynamic choice in the paper is
 made \emph{within} this set; Section~\ref{sec:twoscale} selects the element.
 
@@ -358,7 +356,7 @@ f_j\in\{1,\dots,n_{\mathsf{F}}\},\ \ s_j\in\{1,\dots,n_{\mathsf{S}}\},
 \end{equation}
 where $Z_j$ is log-spot and $(f_j,s_j)$ are a \emph{fast} and a \emph{slow} latent
 volatility regime---\emph{both carried} across maturities, the genuine two-timescale
-(Bergomi) memory. The transition over $[T_j,T_{j+1}]$ is a Gaussian-mixture kernel that
+(Bergomi) memory. The transition over $[T_j,T_{j+1}]$ is a Gaussian-mixture kernel. It
 places the spot--vol leverage in the return \emph{innovation}---a within-step node
 $l=1,\dots,n_{\mathsf{L}}$ correlated with the regime moves---around a \emph{fixed} stationary vol
 target:
@@ -370,13 +368,13 @@ target:
 \end{equation}
 with $\cN(\dd z';m,V)$ the Gaussian measure with mean $m$ and variance $V$.
 The \emph{coefficients} on the right---the weights $w_l$, the transitions $P_{\mathsf{F}},P_{\mathsf{S}}$, the drift
-$d_{f,s,l}$ and variance $V_{f,s,l}$---are functions of the regime indices alone; the spot $z$
+$d_{f,s,l}$ and variance $V_{f,s,l}$---are functions of the regime indices alone. The spot $z$
 enters \emph{only} as the additive centre of the Gaussian, so the kernel depends on $(z,z')$
 solely through the return $z'-z$. It is therefore \textbf{translation-invariant in log-spot}:
-shifting spot shifts the landing law by the same amount, so the conditional return law---and
-hence the smile in moneyness---depends on the regime $(f,s)$ alone, not on the spot level.
+shifting spot shifts the landing law by the same amount. The conditional return law---and
+hence the smile in moneyness---then depends on the regime $(f,s)$ alone, not on the spot level.
 This single property keeps every dynamic readout, the SSR in particular, an exact closed form
-(Section~\ref{sec:ssr}), and makes propagation an exact Gaussian-mixture map
+(Section~\ref{sec:ssr}). It also makes propagation an exact Gaussian-mixture map
 (Section~\ref{sec:twoscale}). The within-step node $l$ carries the instantaneous skew and is
 renewed each step; the two regimes are carried across steps.
 
@@ -404,34 +402,34 @@ martingale property, and exact marginal propagation.
 \begin{theorem}[No static arbitrage]
 \label{thm:noarb}
 Let $\{\mu_j\}_{j=0}^M$ be probability measures on $(0,\infty)$ with
-$\E_{\mu_j}[S]=F_j$ whose forward-normalised laws $\tilde\mu_j=\law(S_{T_j}/F_j)$ are
+$\E_{\mu_j}[S]=F_j$. Assume their forward-normalised laws $\tilde\mu_j=\law(S_{T_j}/F_j)$ are
 increasing in convex order, $\tilde\mu_0\cxle\tilde\mu_1\cxle\cdots\cxle\tilde\mu_M$.
 If $\cK_0,\dots,\cK_{M-1}$ are admissible (each $\cK_j\in\cA_j$), then the discrete-time
 process with initial law $\mu_0$ and transitions $\{\cK_j\}$ is a martingale after
-discounting, has one-dimensional marginals exactly $\{\mu_j\}$, and the induced
-call surface $C_j(K)=D_j\int(s-K)^+\mu_j(\dd s)$ is free of strike (butterfly) and
-calendar static arbitrage. Moreover $\cA_j\neq\emptyset$ for every $j$.
+discounting, with one-dimensional marginals exactly $\{\mu_j\}$. The induced call surface
+$C_j(K)=D_j\int(s-K)^+\mu_j(\dd s)$ is then free of strike (butterfly) and calendar static
+arbitrage. Moreover $\cA_j\neq\emptyset$ for every $j$.
 \end{theorem}
 
 \noindent A proof sketch is given in Appendix~\ref{app:proof}. The content is that the
 no-arbitrage \emph{claim attaches to the admissible set}, and that the set is nonempty
 precisely because SANOS delivers marginals in convex order (Strassen). SANOS's own canonical
-discrete-local-volatility coupling~\cite{buehler2026sanos} is one element of $\cA_j$---the
-rigid one the introduction set out to replace; the dynamic targets of
+discrete-local-volatility coupling~\cite{buehler2026sanos} is one element of $\cA_j$: the
+rigid one the introduction set out to replace. The dynamic targets of
 Sections~\ref{sec:rung}--\ref{sec:ssr} (SSR, VIX, forward starts) \emph{select a different,
-controllable element within} $\cA_j$---they never replace the set.
+controllable element within} $\cA_j$. They never replace the set.
 
 \begin{remark}[Structural marginal-matching, not fit-then-project]
 \label{rem:fitproject}
 The translation-invariant kernel of Section~\ref{sec:twoscale} cannot match an arbitrary
 prescribed marginal by itself: a pure convolution adds the same increment law at every
 spot and cannot reshape the smile. Marginal-matching is restored by a deterministic
-\emph{leverage overlay} $\sigma_{\mathrm{LV}}(z,T_j)$---the discrete stochastic-local-volatility
-structure---chosen by Gy\"ongy's identity so the forward map lands on the SANOS target
+\emph{leverage overlay} $\sigma_{\mathrm{LV}}(z,T_j)$, the discrete stochastic-local-volatility
+structure. Gy\"ongy's identity chooses it so the forward map lands on the SANOS target
 \emph{by construction} (Section~\ref{sec:fusion}, \eqref{eq:gyongy}). There is thus
-\emph{no fit-then-project}: the first three admissibility conditions are structural in the
-coefficient map and the fourth (marginal-matching) is the leverage, so calibration fits
-only the \emph{dynamic} (SSR) knobs while the statics come along for free.
+\emph{no fit-then-project}. The first three admissibility conditions are structural in the
+coefficient map, and the fourth (marginal-matching) is the leverage. Calibration therefore fits
+only the \emph{dynamic} (SSR) knobs, while the statics come along for free.
 \end{remark}
 
 %=============================================================================
@@ -447,11 +445,11 @@ propagation, and the Gy\"ongy leverage that lands the propagated marginals on th
 targets. Recompression and semigroup interpolation then complete the toolkit.
 
 \subsection{Two carried timescales and the Gauss--Hermite discretisation}
-The latent log-variance is a baseline plus two mean-reverting Ornstein--Uhlenbeck factors---a
-\emph{fast} factor $X^{\mathsf{F}}$ (rate $\kappa_{\mathsf{F}}$) and a \emph{slow} factor $X^{\mathsf{S}}$ (rate $\kappa_{\mathsf{S}}$)---so
-that $x_j=\bar\gamma+X^{\mathsf{F}}_j+X^{\mathsf{S}}_j$, the continuous two-factor Bergomi model. Conditional on the latent vol the one-step log-return is
-Gaussian, but its mean and variance are \emph{functions of the continuous vol state}: the
-kernel is then a continuous, variable-coefficient mixture of Gaussians---an integral over the
+The latent log-variance is a baseline plus two mean-reverting Ornstein--Uhlenbeck factors: a
+\emph{fast} factor $X^{\mathsf{F}}$ (rate $\kappa_{\mathsf{F}}$) and a \emph{slow} factor $X^{\mathsf{S}}$ (rate $\kappa_{\mathsf{S}}$).
+So $x_j=\bar\gamma+X^{\mathsf{F}}_j+X^{\mathsf{S}}_j$, the continuous two-factor Bergomi model. Conditional on the latent vol the one-step log-return is
+Gaussian. But its mean and variance are \emph{functions of the continuous vol state}, so the
+kernel is a continuous, variable-coefficient mixture of Gaussians: an integral over the
 latent factors, \emph{not} a finite Gaussian mixture, and not closed form. The remedy is
 quadrature. An $n$-point \textbf{Gauss--Hermite} rule represents $\cN(0,1)$ by $n$ nodes
 $\zeta_l$ and weights $w_l$ reproducing the Gaussian's moments through order $2n-1$,
@@ -461,8 +459,8 @@ $\zeta_l$ and weights $w_l$ reproducing the Gaussian's moments through order $2n
 \label{eq:gh}
 \end{equation}
 the moment-optimal finite stand-in for a Gaussian. Replacing each continuous latent quantity
-by its $n$ GH nodes turns the integral into a finite sum---each node a \emph{vol
-scenario}---so the kernel becomes a finite Gaussian mixture over a quadrature grid. \emph{Both}
+by its $n$ GH nodes turns the integral into a finite sum, each node a \emph{vol scenario}.
+The kernel then becomes a finite Gaussian mixture over a quadrature grid. \emph{Both}
 vol factors are carried:
 \begin{itemize}
   \item \textbf{Fast factor $\mathsf{F}$}---carried regime, node index $f=1,\dots,n_{\mathsf{F}}$, mean-reversion
@@ -477,8 +475,8 @@ vol factors are carried:
 The nodes $\{\zeta^{\mathsf{F}}_f\},\{\zeta^{\mathsf{S}}_s\},\{\zeta^{\mathsf{L}}_l\}$ and base
 log-weights $\eta^{\mathsf{F}},\eta^{\mathsf{S}}$
 (within-step weights $w_l=\softmax(\eta^{\mathsf{L}})$) are \emph{fixed} quadrature constants, not
-parameters (fitting the base weights as an expressive residual is a design alternative we do not
-use); the data fit only the nine structural knobs of the coefficient map below. The
+parameters. Fitting the base weights as an expressive residual is a design alternative we do not
+use. The data fit only the nine structural knobs of the coefficient map below. The
 vol-of-vols $\nu_{\mathsf{F}},\nu_{\mathsf{S}},\nu_{\mathsf{L}}$ scale the nodes, the leverages $\lambda_{\mathsf{F}},\lambda_{\mathsf{S}}$ couple
 the regime moves to the realised return node $l$ (never to $z$), and $\lambda_{\mathrm{skew}}$
 tilts the within-step return. The node counts are a deliberate \emph{modelling} choice, not an accuracy dial. The within-step
@@ -486,10 +484,9 @@ factor (small $\nu_{\mathsf{L}}$) is converged at $n_{\mathsf{L}}=5$, but the ca
 $V\propto e^{\nu\zeta}$ is lognormal in the node, and Gauss--Hermite, being polynomial-exact,
 resolves $\E[V]$ only gradually for the larger $\nu_{\mathsf{F}},\nu_{\mathsf{S}}$. A sweep shows the ATM-vol level
 still drifting at $n_{\mathsf{F}}=9,\,n_{\mathsf{S}}=7$. We therefore keep a coarse $n_{\mathsf{F}}=5,\,n_{\mathsf{S}}=3$ and let
-calibration absorb the discretisation: $\bar\gamma$ and the leverages are fit \emph{at} the
-grid, so the model hits its ATM and SSR targets at any node count, and refining merely re-shifts
-$\bth$. The continuous limit $n_{\mathsf{F}},n_{\mathsf{S}}\to\infty$ is thus a structural relationship, not a
-practical convergence claim at these counts; the counts trade resolution against parameter
+calibration absorb the discretisation. Because $\bar\gamma$ and the leverages are fit \emph{at} the
+grid, the model hits its ATM and SSR targets at any node count, and refining merely re-shifts
+$\bth$. The continuous limit $n_{\mathsf{F}},n_{\mathsf{S}}\to\infty$ is thus a structural relationship, not a practical convergence claim at these counts. The counts trade resolution against parameter
 identifiability (Appendix~\ref{app:ident}) and cost.
 
 \subsection{The coefficient map}
@@ -512,10 +509,10 @@ P_{\mathsf{S}}(s'\mid l,s)&=\softmax_{s'}\!\big(\eta^{\mathsf{S}}_{s'}+\kappa_{\
 \end{align}
 Here $\eta$ pulls to the centre (mean reversion), $\kappa$ to the current regime
 (persistence / timescale), and $\lambda_{\mathsf{F}},\lambda_{\mathsf{S}}$ are the \emph{innovation}
-leverages: a down move ($\zeta^{\mathsf{L}}_l$ large via $\lambda_{\mathrm{skew}}<0$) tilts the
+leverages. A down move ($\zeta^{\mathsf{L}}_l$ large via $\lambda_{\mathrm{skew}}<0$) tilts the
 regimes to higher vol. Because the leverage multiplies the innovation around a
 \emph{fixed} stationary target, the equilibrium vol is \emph{not} a deterministic
-function of spot---it is genuine stochastic volatility, and the kernel stays
+function of spot. It is genuine stochastic volatility, and the kernel stays
 translation-invariant in $z$.
 
 \subsection{Exact per-fibre martingale normalisation}
@@ -530,7 +527,7 @@ d_{f,s,l}=\widetilde m_{f,s,l}-A_{f,s},
 \end{equation}
 so that $\E[e^{Z_{j+1}}\mid z,f,s]=e^{z}$ exactly. The shift is a single per-fibre
 constant, \emph{independent of $z$} (the within-step weights $w_l$ are the fixed
-Gauss--Hermite weights)---stable, differentiable, and it preserves the relative branch
+Gauss--Hermite weights). It is stable and differentiable, and it preserves the relative branch
 tilts that carry the leverage and the SSR. It replaces any penalty-only enforcement and
 the fragile ``adjust one component mean'' construction, which fails when the required
 numerator turns non-positive. The kernel is now complete: a finite Gaussian-mixture
@@ -539,17 +536,17 @@ martingale on $(z,f,s)$.
 \subsection{Spot-translation invariance and the SSR dial}
 \label{sec:invariance}
 With every coefficient in \eqref{eq:kernel} independent of $z$ (Section~\ref{sec:kernel}), the
-conditional smile $\sigma(T;f,s)$ depends only on the regime pair, and the skew-stickiness
-ratio is generated by the \emph{innovation} leverage
+conditional smile $\sigma(T;f,s)$ depends only on the regime pair. The skew-stickiness ratio is
+then generated by the \emph{innovation} leverage
 $\lambda_{\mathsf{F}},\lambda_{\mathsf{S}}$ (the return$\leftrightarrow$regime correlation), not by any
 $z$-coupling: $\lambda_{\mathsf{F}}=\lambda_{\mathsf{S}}=0\Rightarrow$ no spot--vol comovement
-$\Rightarrow\SSR=0$ (sticky-moneyness); the dials and their term-structure shaping are
+$\Rightarrow\SSR=0$ (sticky-moneyness). The dials and their term-structure shaping are
 developed in Section~\ref{sec:ssr}. The SSR is
 thus not a spot-derivative of a state-dependent smile but the closed-form
 return$\,\times\,$regime covariance of Section~\ref{sec:ssr}. The placement of the leverage is
 a design decision with teeth. A Monte-Carlo cross-check showed that coupling the regimes to
 \emph{spot} instead makes the equilibrium vol a deterministic function of spot (local
-volatility), which pins $\SSR\to2$ at long maturities and cannot be re-tuned. Placing the
+volatility). That pins $\SSR\to2$ at long maturities and cannot be re-tuned. Placing the
 leverage in the innovation breaks that floor while keeping the readouts exact.
 
 \subsection{Exact Gaussian-mixture closure}
@@ -573,12 +570,12 @@ P_{\mathsf{F}}(f'\!\mid\! l,f)\,P_{\mathsf{S}}(s'\!\mid\! l,s)\,
 \label{eq:gm-closure}
 \end{equation}
 each new component the convolved Gaussian of~\eqref{eq:gauss-conv}, reweighted by the within-step
-weight $w_l$ and the regime transitions: $\mathrm{GM}\ast\mathrm{GM}=\mathrm{GM}$,
-exactly---no quadrature, PDE, or Monte Carlo anywhere in the chain. (A \emph{state-dependent}
-kernel---$z$-dependent weights $w_l(z)$ or variances---breaks~\eqref{eq:gauss-conv}: propagation
-relapses to a continuous integral mixture, forcing a first-order collocation that a Monte-Carlo
-cross-check showed biases the multi-step SSR.) The lone cost is that~\eqref{eq:gm-closure}
-multiplies the component count by $n_{\mathsf{L}}n_{\mathsf{F}}n_{\mathsf{S}}$ each step; the
+weight $w_l$ and the regime transitions: $\mathrm{GM}\ast\mathrm{GM}=\mathrm{GM}$, exactly.
+No quadrature, PDE, or Monte Carlo appears anywhere in the chain. (A \emph{state-dependent}
+kernel---$z$-dependent weights $w_l(z)$ or variances---breaks~\eqref{eq:gauss-conv}. Propagation
+then relapses to a continuous integral mixture, forcing a first-order collocation that a
+Monte-Carlo cross-check showed biases the multi-step SSR.) The lone cost is that~\eqref{eq:gm-closure}
+multiplies the component count by $n_{\mathsf{L}}n_{\mathsf{F}}n_{\mathsf{S}}$ each step. The
 recompression of \S\ref{sec:recompress} below holds it to a fixed budget by a moment-preserving,
 martingale-relocked reduction. Convex-order / calendar no-arbitrage rests on the martingale
 kernel, not on this exact finite closure.
@@ -598,25 +595,25 @@ increment into a local scale and a unit stochastic-vol factor,
 \bar V_{f,s}=\E_l[V_{f,s,l}]+\Var_l(d_{f,s,l}),
 \end{equation}
 where $\xi$ is a standard (unit-variance) innovation, $\bar d_{f,s}$ the per-fibre
-martingale-lock drift (Section~\ref{sec:invariance}), and $\bar V_{f,s}$ the kernel's
-\emph{full} one-step increment variance by the law of total variance---the within-node
-$\E_l[V_{f,s,l}]$ plus the between-node mean spread $\Var_l(d_{f,s,l})$ the skew tilt
-$\lambda_{\mathrm{skew}}$ creates (using $\E_l[V]$ alone mis-scales the leverage by $\sim 3\times$
-at the calibrated $\lambda_{\mathrm{skew}}$). The unit factor
+martingale-lock drift (Section~\ref{sec:invariance}), and $\bar V_{f,s}$ the kernel's \emph{full} one-step increment
+variance by the law of total variance: the within-node $\E_l[V_{f,s,l}]$ plus the between-node
+mean spread $\Var_l(d_{f,s,l})$ that the skew tilt $\lambda_{\mathrm{skew}}$ creates. Using
+$\E_l[V]$ alone mis-scales the leverage by $\sim 3\times$ at the calibrated
+$\lambda_{\mathrm{skew}}$. The unit factor
 $\nu_{f,s}$ ($\E_\pi[\nu]=1$, with italic regime indices---not the sans-labelled vol-of-vol
-amplitudes $\nu_{\mathsf F},\nu_{\mathsf S},\nu_{\mathsf L}$) keeps the kernel's
-fluctuation---the regime comovement, i.e.\ the
-SSR---and drops its level; $\sigma_{\mathrm{LV}}$ sets the level from the market.
+amplitudes $\nu_{\mathsf F},\nu_{\mathsf S},\nu_{\mathsf L}$) keeps the kernel's fluctuation,
+the regime comovement, i.e.\ the SSR. It drops the level, and $\sigma_{\mathrm{LV}}$ sets that
+level from the market.
 Marginal-matching is then Gy\"ongy's identity~\cite{gyongy1986} in discrete form,
 \begin{equation}
 \sigma_{\mathrm{LV}}^2(z,T_j)=\frac{\sigma_{\mathrm{Dupire}}^2(z,T_j)}{\E[\nu\mid z]},
 \label{eq:gyongy}
 \end{equation}
 with $\sigma_{\mathrm{Dupire}}$ from the SANOS marginals (closed-form Gaussian-mixture
-call $+$ Breeden--Litzenberger density, calendar finite-difference) and $\E[\nu\mid z]$
-the \emph{spot-conditional} average of the unit factor (distinct from the stationary
-$\E_\pi[\nu]=1$; near $1$, tilted only by the spot--vol
-correlation)---\eqref{eq:gyongy} being the exact discrete Gy\"ongy projection regardless. The decoupling is then literal: SANOS sets the statics and, through the
+call $+$ Breeden--Litzenberger density, calendar finite-difference). Here $\E[\nu\mid z]$ is the
+\emph{spot-conditional} average of the unit factor, distinct from the stationary
+$\E_\pi[\nu]=1$: near $1$, tilted only by the spot--vol correlation. Either way,
+\eqref{eq:gyongy} is the exact discrete Gy\"ongy projection. The decoupling is then literal: SANOS sets the statics and, through the
 leverage, the local-vol roll; the kernel carries the SV response (the bulk of the SSR
 level). In parameter terms the decoupling \emph{is} the split of the fused per-step variance into a
 market level and a unit-mean kernel shape,
@@ -626,10 +623,10 @@ market level and a unit-mean kernel shape,
 \underbrace{\nu_{f,s}}_{\text{shape (kernel)},\ \E_\pi[\nu]=1},
 \label{eq:decouple}
 \end{equation}
-whose $\pi$-average is exactly $\sigma_{\mathrm{LV}}^2\Delta_j$: the \emph{level} is set by the
+whose $\pi$-average is exactly $\sigma_{\mathrm{LV}}^2\Delta_j$. The \emph{level} is set by the
 leverage, and the kernel reaches the fused law \emph{only} through the unit-mean ratio
 $\nu_{f,s}=\bar V_{f,s}/\E_\pi[\bar V]$. The kernel's own variance level is carried by
-$\bar\gamma$, which multiplies every $V_{f,s,l}$ by $e^{\bar\gamma}$; this nearly divides out of
+$\bar\gamma$, which multiplies every $V_{f,s,l}$ by $e^{\bar\gamma}$. This nearly divides out of
 $\nu$ and is reset by $\sigma_{\mathrm{LV}}$, leaving $\bar\gamma$ nearly inert (the $\Var_l(d)$
 term breaks exact $e^{\bar\gamma}$ homogeneity). What survives in $\nu$ is the
 regime-\emph{relative} structure---the $\nu_{\mathsf{F}}\zeta^{\mathsf{F}}_f,
@@ -643,33 +640,32 @@ for free, and the SSR is the lone free dynamic target.
 
 Because $\sigma_{\mathrm{LV}}(z)$ is a smooth, deterministic statics object, collocating it at
 the component means affects only the level, not the SSR mechanism, which stays
-translation-invariant and exact. For \emph{marginal matching}---each step re-seeded from the
-target law, with regimes at their spot-uncorrelated stationary spread---the residual is then
-discretisation rather than bias: the discrete Dupire under-reads the local variance at the
-narrowest (short-$T$) marginals ($\sim$50--85\,bp), and this tightens with a central-difference
-Dupire, finer grids, and a tail-clamped leverage. Under multi-step \emph{concatenation from a
+translation-invariant and exact. For \emph{marginal matching}---each step re-seeded from the target law, with regimes at their
+spot-uncorrelated stationary spread---the residual is discretisation rather than bias. The
+discrete Dupire under-reads the local variance at the narrowest (short-$T$) marginals
+($\sim$50--85\,bp). This tightens with a central-difference Dupire, finer grids, and a
+tail-clamped leverage. Under multi-step \emph{concatenation from a
 fixed spot} (forward densities and hedging, Section~\ref{sec:recompress}) the shortcut is
 \emph{not} free. The negative leverage tilt correlates high-$\nu$ regimes with low $z$, so the
 spot-conditional $\E[\nu\mid z{=}0]$ falls measurably below $1$ (empirically $\approx\!0.7$ on
-SPX), and approximating $\sigma_{\mathrm{LV}}\approx\sigma_{\mathrm{Dupire}}$ then \emph{under-reads}
+SPX). Approximating $\sigma_{\mathrm{LV}}\approx\sigma_{\mathrm{Dupire}}$ then \emph{under-reads}
 the accumulated ATM level by of order $10\%$ in vol over a multi-month chain. There the exact
-projection~\eqref{eq:gyongy} is retained: $\E[\nu\mid z]$ is negligible for reproducing marginals,
-but a genuine path-conditional rescaling for absolute-level outputs such as forward implied vol
-and hedge P\&L.
+projection~\eqref{eq:gyongy} is retained: $\E[\nu\mid z]$ is negligible for reproducing marginals, but becomes a genuine
+path-conditional rescaling for absolute-level outputs such as forward implied vol and hedge
+P\&L.
 
 \subsection{Recompression: keeping the budget flat under concatenation}
 \label{sec:recompress}
 Recompression is a \emph{multi-step} device: a \emph{single} kernel application leaves a
 manageable $n_{\mathsf{L}}n_{\mathsf{F}}n_{\mathsf{S}}$-component mixture and needs none. It is
 \emph{concatenation}---composing $\cK_j\circ\cK_{j+1}\circ\cdots$ over several steps for forward
-densities, exotics, or interpolation---that compounds the count: each composed step multiplies
-the per-fibre spot mixture by $n_{\mathsf{L}}n_{\mathsf{F}}n_{\mathsf{S}}$ (each target fibre aggregates the $n_{\mathsf{F}}n_{\mathsf{S}}$ source regimes and the $n_{\mathsf{L}}$ within-step nodes),
-so left alone the count is $(n_{\mathsf{L}}n_{\mathsf{F}}n_{\mathsf{S}})^J$ after $J$ steps. Each composed
-step therefore ends with a recompression that holds the budget flat---it preserves the
-\emph{propagated} marginal with fewer components; the match to the SANOS \emph{target} is the
-separate Gy\"ongy step (Remark~\ref{rem:fitproject}), not part of recompression. The default is
-a deterministic \emph{moment-preserving merge} (per fibre: sort by mean, split into
-$n_{\mathrm{keep}}$ equal-weight chunks, match each chunk's first three moments), and one may
+densities, exotics, or interpolation---that compounds the count. Each composed step multiplies
+the per-fibre spot mixture by $n_{\mathsf{L}}n_{\mathsf{F}}n_{\mathsf{S}}$: each target fibre
+aggregates the $n_{\mathsf{F}}n_{\mathsf{S}}$ source regimes and the $n_{\mathsf{L}}$ within-step
+nodes. Left alone, the count is $(n_{\mathsf{L}}n_{\mathsf{F}}n_{\mathsf{S}})^J$ after $J$ steps. Each composed step therefore ends with a recompression that holds the budget flat: it preserves
+the \emph{propagated} marginal with fewer components. The match to the SANOS \emph{target} is the
+separate Gy\"ongy step (Remark~\ref{rem:fitproject}), not part of recompression. The default is a deterministic \emph{moment-preserving merge}: per fibre, sort by mean, split into
+$n_{\mathrm{keep}}$ equal-weight chunks, and match each chunk's first three moments. One may
 equivalently refit a compact martingale kernel $\widetilde\cK_j$ reproducing the propagated
 marginal at the digital level,
 \begin{equation}
@@ -681,21 +677,19 @@ e^{\widetilde d_l+\frac12\widetilde\sigma_l^2}=1\ \text{(per fibre)}.
 \label{eq:recompress}
 \end{equation}
 Because $\widetilde\cK_j$ is a martingale kernel,
-$\rho_j\widetilde\cK_j\succeq_{\mathrm{cx}}\rho_j$ automatically (Strassen), so convex
-order---hence calendar no-arbitrage---holds by construction and the convex-order
-inequalities need not be imposed. The martingale is re-locked by~\eqref{eq:mg-norm} after the
-merge (which preserves the moments of $z$ but not the forward $\E[e^z]$); a constrained
-weight-LP (fixed reduced locations, weights fitted to the propagated CDF subject to exact
-forward and convex order, reporting the residual) is available as a refinement where the merge
-is too coarse. Recompression is done every composed step,
+$\rho_j\widetilde\cK_j\succeq_{\mathrm{cx}}\rho_j$ automatically (Strassen). Convex order---hence calendar no-arbitrage---therefore holds by
+construction, and the convex-order inequalities need not be imposed. The martingale is re-locked by~\eqref{eq:mg-norm} after the merge, which preserves the moments of
+$z$ but not the forward $\E[e^z]$. Where the merge is too coarse, a constrained weight-LP is
+available as a refinement: fixed reduced locations, weights fitted to the propagated CDF subject
+to exact forward and convex order, with the residual reported. Recompression is done every composed step,
 per-fibre (never merging away the carried regimes), deterministically, with the
 residual reported.
 
 Recompression touches only the component \emph{budget}; the marginal-match is restored
 \emph{structurally}, by re-applying the Gy\"ongy leverage~\eqref{eq:gyongy} to the recompressed
 mixture. The leverage is a local, deterministic rescaling read from the recompressed mixture's
-own Dupire surface against the SANOS target, so it absorbs the moment-merge error in the same
-operation that matches the kernel's intrinsic marginal: the per-step pipeline is
+own Dupire surface against the SANOS target. It therefore absorbs the moment-merge error in the
+same operation that matches the kernel's intrinsic marginal. The per-step pipeline is
 \emph{propagate} (dynamics) $\to$ \emph{recompress} (budget $+$ re-lock) $\to$ \emph{leverage}
 (Gy\"ongy) $\to$ re-lock, with \emph{no projection at any step}. Convex order survives because
 the match is to the convex-ordered SANOS target, and the leverage edits only the local
@@ -704,13 +698,14 @@ the match is to the convex-ordered SANOS target, and the leverage edits only the
 \subsection{Intermediate maturities: OU-semigroup interpolation}
 \label{sec:interp}
 Because the carried factor is OU, the generator is time-homogeneous and the transition operators form
-a semigroup. Writing the latent log-variance as $x_t=g_0(t)+X^{\mathsf{F}}_t+X^{\mathsf{S}}_t$ (a
-time-inhomogeneous forward-variance level $g_0$ plus a time-homogeneous generator), one interpolates
-only the one-dimensional curve $g_0$ and constructs intermediate kernels by evaluation. At the midpoint
+a semigroup. Write the latent log-variance as $x_t=g_0(t)+X^{\mathsf{F}}_t+X^{\mathsf{S}}_t$: a
+time-inhomogeneous forward-variance level $g_0$ plus a time-homogeneous generator. One then
+interpolates only the one-dimensional curve $g_0$, and constructs intermediate kernels by
+evaluation. At the midpoint
 the kernel square root is the half-time semigroup element $\cK_{[T_1,T_2]}=P_{\Delta T/2}$, so
 $\cK\circ\cK=P_{\Delta T}=\cK_{[T_1,T_3]}$ exactly, with no optimisation. The carried vol state is what
-makes this work: the spot-only kernel (marginalising the vol state at the intermediate step) does not
-compose, which is why a memoryless kernel requires a matching optimisation. Calendar no-arbitrage on
+makes this work. The spot-only kernel---marginalising the vol state at the intermediate step---does
+not compose, which is why a memoryless kernel requires a matching optimisation. Calendar no-arbitrage on
 the interpolated marginal is automatic when $g_0$ gives non-decreasing total variance.
 
 %=============================================================================
@@ -719,9 +714,9 @@ the interpolated marginal is automatic when $g_0$ gives non-decreasing total var
 %=============================================================================
 
 We fit \emph{digitals} (CDFs), not prices. A digital is the strike-derivative of a
-call, $-\partial_K C=1-G(K)$---one derivative above the price, one below the
-density---and the bound that justifies the choice lives in the \emph{spot/strike}
-variable $s$ (with $G$ the law of $S_T$):
+call, $-\partial_K C=1-G(K)$: one derivative above the price, one below the density. The bound
+that justifies the choice lives in the \emph{spot/strike} variable $s$ (with $G$ the law of
+$S_T$):
 \begin{equation}
 \begin{aligned}
 \sup_K|C_\bth-C_\star|
@@ -732,9 +727,9 @@ variable $s$ (with $G$ the law of $S_T$):
 \label{eq:w1}
 \end{equation}
 
-The middle equality is what makes the digital fit a \emph{price} metric: the $L^1$ norm of
+The middle equality is what makes the digital fit a \emph{price} metric. The $L^1$ norm of
 $\partial_K(C_\bth-C_\star)$ is the homogeneous Sobolev $\dot W^{1,1}$ seminorm of the call-price
-difference, equal to its total variation and---since $-\partial_K C$ is the digital---to the
+difference. That equals its total variation and---since $-\partial_K C$ is the digital---the
 \emph{aggregate mispricing of all digitals}. The gap $G_\star-G_\bth$ that the
 band-loss~\eqref{eq:objective} drives into the bid--ask band is exactly the integrand of this
 $W_1$, so fitting digitals strike by strike minimises the price-space Wasserstein distance. The
@@ -747,7 +742,7 @@ is bounded by $W_1$ in spot. In log-coordinate $z=\log s$ the integral acquires 
 Jacobian weight, $\int|G_\bth-G_\star|e^z\dd z$, so an unweighted log-space CDF loss
 does not by itself control call prices. Accordingly, any log-space, exponential-growth
 discrepancy used adversarially below is a financial pricing discrepancy / integral
-probability metric, not literally Wasserstein-$1$; we reserve ``Wasserstein'' for the
+probability metric, not literally Wasserstein-$1$. We reserve ``Wasserstein'' for the
 spot-coordinate bound~\eqref{eq:w1}.
 \end{remark}
 
@@ -772,15 +767,15 @@ d^i_2=\frac{\log(F^i_\bth/K_i)-\tfrac12(\sigma^i_\bth)^2}{\sigma^i_\bth},
 \]
 the Breeden--Litzenberger survival $-\partial_K C_\bth$ of the mixture call~\eqref{eq:mix-price},
 fit to the market digital bid--ask band $[\underline S_i,\overline S_i]$. The $w^{\mathrm{spr}}_i$ are
-inverse-spread weights and $\beta_{\SSR},\beta_{\mathrm{vov}}$ the soft-target weights;
+inverse-spread weights, and $\beta_{\SSR},\beta_{\mathrm{vov}}$ the soft-target weights. Here
 $\SSR_T(\bth)$ is the model SSR~\eqref{eq:ssr-def} (in closed form,~\eqref{eq:ssr-model}) and
-$\SSR^\star_T$ its target; $\cR_{\mathrm{vov}}(\bth)$ is the vol-of-vol readout
-residual~\eqref{eq:Rvov}; both \emph{dynamic} targets---the SSR and the vol-of-vol readout---are
+$\SSR^\star_T$ its target, while $\cR_{\mathrm{vov}}(\bth)$ is the vol-of-vol readout
+residual~\eqref{eq:Rvov}. Both \emph{dynamic} targets---the SSR and the vol-of-vol readout---are
 developed in Section~\ref{sec:ssr}. The minimisation is subject to the admissibility
 constraints~\eqref{eq:admissible}. The martingale property is
-one of them, enforced \emph{exactly} rather than softly: a single-marginal mixture
+one of them, enforced \emph{exactly} rather than softly. A single-marginal mixture
 calibration would add a forward-matching cost
-$\lambda\big(\sum_k\pi_k e^{m_k+q_k/2}-1\big)^2$ to the loss, whereas here the per-fibre
+$\lambda\big(\sum_k\pi_k e^{m_k+q_k/2}-1\big)^2$ to the loss. Here the per-fibre
 lock~\eqref{eq:mg-norm} drives the conditional forward error to zero at every state and
 every~$\bth$, so the analogous term is identically zero and is dropped. Only the
 genuinely free targets---marginal fit, SSR, and vol-of-vol---remain
@@ -794,9 +789,8 @@ risk-neutral route. Even then the emergent SSR is not guaranteed: the Quintic OU
 full SPX \emph{and} VIX smiles jointly and still finds its SSR significantly below the market's,
 restoring it with exactly such a band penalty~\cite{abijaber2025}. Where the dynamic instruments
 are thin (most underlyings), the $\beta_{\SSR}$ penalty instead acts as an interpretable
-\emph{steer}, its target a realized-SSR estimate or a desk view---a real-world
-($\mathbb P$) quantity, not the risk-neutral SSR, so it neglects the volatility risk
-premium. The penalty form is robust either way; an adversarial form (a min--max over an
+\emph{steer}. Its target is a realized-SSR estimate or a desk view: a real-world
+($\mathbb P$) quantity, not the risk-neutral SSR, so it neglects the volatility risk premium. The penalty form is robust either way; an adversarial form (a min--max over an
 exponential-growth critic for the worst-mispriced digital) is an optional alternative when
 forward-start/VIX digitals are rich.
 
@@ -860,7 +854,7 @@ De-event smile, event-jump density, event-conditional hedge & clean-flank bridge
 This section develops the two \emph{dynamic} targets of the calibration
 objective~\eqref{eq:objective}: the skew-stickiness ratio $\SSR_T(\bth)$ (the regime
 comovement, in closed form below) and the forward-variance / vol-of-vol readout
-$\cR_{\mathrm{vov}}(\bth)$---each a closed-form function of the generator $\bth$. The
+$\cR_{\mathrm{vov}}(\bth)$. Each is a closed-form function of the generator $\bth$. The
 desk-facing ATM features and the SSR-consistent hedge follow from the same machinery.
 
 \subsection{The skew-stickiness ratio}
@@ -879,7 +873,7 @@ or beyond sticky-strike, never near sticky-delta. We fix this convention through
 A single marginal pins $\law(S_T)$ but not how the smile moves; that information lives in
 the kernel. Because the kernel is translation-invariant in $z$
 (Section~\ref{sec:invariance}), the conditional smile $\sigma(T;f,s)$ depends only on the
-regime pair, so the empirical SSR---the regression of ATM-vol changes on returns---is
+regime pair. The empirical SSR---the regression of ATM-vol changes on returns---is therefore
 \emph{not} a spot-derivative but a finite closed-form sum over the regime transitions. With
 $\pi_{f,s}$ the stationary law of the carried chain, $r$ the one-step return with node
 values $d_{f,s,l}$, and $\mathrm{skew}(T)=\sum_{f,s}\pi_{f,s}\,\mathcal S_T(f,s)$ ($\mathcal S_T(f,s)=\partial_k\sigma(T;f,s)|_{k=0}$ the regime-conditional ATM skew),
@@ -892,34 +886,37 @@ values $d_{f,s,l}$, and $\mathrm{skew}(T)=\sum_{f,s}\pi_{f,s}\,\mathcal S_T(f,s)
 \end{aligned}
 \label{eq:ssr-model}
 \end{equation}
-with $\sigma(T;f,s)$ the ATM vol of the $(T/\Delta_j)$-step propagation started in regime $(f,s)$ ($\Var(r)$ the $\pi$-averaged conditional return variance; the between-regime mean term $\Var_\pi(\sum_l w_l d_{f,s,l})\sim0.2\%$ is higher-order and dropped). The covariance \emph{is} the leverage: a down-return
+with $\sigma(T;f,s)$ the ATM vol of the $(T/\Delta_j)$-step propagation started in regime
+$(f,s)$, and $\Var(r)$ the $\pi$-averaged conditional return variance. The between-regime mean
+term $\Var_\pi(\sum_l w_l d_{f,s,l})\sim0.2\%$ is higher-order and dropped. The covariance \emph{is} the leverage: a down-return
 node $l$ tilts $P_{\mathsf{F}},P_{\mathsf{S}}$ toward higher vol (via $\lambda_{\mathsf{F}},\lambda_{\mathsf{S}}$), so $\Delta\sigma$
-correlates with $r$. It is a finite sum over $(l,f,s,f',s')$---no spot-bump, no Monte Carlo,
-no measure-transport approximation---and is Monte-Carlo-confirmed: the sum sits at the centre
+correlates with $r$. It is a finite sum over $(l,f,s,f',s')$: no spot-bump, no Monte Carlo,
+no measure-transport approximation. It is also Monte-Carlo-confirmed---the sum sits at the centre
 of a direct one-step regression, $|\mathrm{diff}|\approx 0.005$ at 1m/3m/6m/1y
 (Section~\ref{sec:synth}). Once the \eqref{eq:gyongy} leverage is in, the realised SSR picks
-up a second, additive piece: a \emph{local-vol roll} $\partial_z\hat\sigma$ (the spot-shift
-derivative $\dd\hat\sigma_{\mathrm{ATM}}/\dd\log S$, $z=\log(S/F)$) set by the forward-variance
-curve, which is statics owned by SANOS. This sits on top of the stochastic-vol response, which
+up a second, additive piece: a \emph{local-vol roll} $\partial_z\hat\sigma$, the spot-shift
+derivative $\dd\hat\sigma_{\mathrm{ATM}}/\dd\log S$ with $z=\log(S/F)$. It is set by the
+forward-variance curve, which is statics owned by SANOS. This sits on top of the stochastic-vol response, which
 carries the bulk of the level. Both pieces are closed form, and the fused readout is likewise
 Monte-Carlo-validated.
 
 \subsection{The SSR dials}
 The innovation leverages $\lambda_{\mathsf{F}},\lambda_{\mathsf{S}}$ carry the comovement (Section~\ref{sec:invariance}):
 $\lambda_{\mathsf{F}}=\lambda_{\mathsf{S}}=0\Rightarrow\SSR=0$, and raising them lifts it through the sticky-strike value $\SSR=1$
-toward the short-maturity diffusive limit near $2$, so the empirical SPX range
-$\SSR\in[1,2]$ is a leverage-magnitude statement. Acting through the two timescales with
+toward the short-maturity diffusive limit near $2$. The empirical SPX range
+$\SSR\in[1,2]$ is therefore a leverage-magnitude statement. Acting through the two timescales with
 $\kappa_{\mathsf{F}},\kappa_{\mathsf{S}}$, they shape
-the SSR \emph{term structure}---level \emph{and} slope: the fast $\kappa_{\mathsf{F}}$ gives the high,
-decaying short end, the slow $\kappa_{\mathsf{S}}$ the sustained long-end floor that one factor cannot.
+the SSR \emph{term structure}---level \emph{and} slope. The fast $\kappa_{\mathsf{F}}$ gives the
+high, decaying short end; the slow $\kappa_{\mathsf{S}}$ the sustained long-end floor that one
+factor cannot.
 That is what Section~\ref{sec:rung} fits to SPX. (The SSR is regime- and vol-of-vol-dependent
-rather than fixed by the variance-curve slope; a rising forward-variance curve lifts its
+rather than fixed by the variance-curve slope. A rising forward-variance curve lifts its
 \emph{level} relative to a flat one~\cite{frizgatheral2024}---a leading-order, qualitative
 effect, not a slope law.) Where forward-start prices are liquid, the same $(\lambda,\kappa)$ are
 pinned by fitting those prices directly. The kernel prices forward-starting calls in closed form,
 $C^{\mathrm{FS}}_{T_1,T_2}(k)=D_{T_2}\int\rho_{T_1}(\dd x)\int\cK_{T_1,T_2}(x,\dd y)(e^{y-x}-k)^+$,
-and its strike-derivative is the forward-return survival function---the clean traded proxy for the
-SSR---so the SSR \emph{emerges} as a diagnostic. How much the SSR can move at \emph{fixed} smile is
+Its strike-derivative is the forward-return survival function, the clean traded proxy for the
+SSR, so the SSR \emph{emerges} as a diagnostic. How much the SSR can move at \emph{fixed} smile is
 bounded: this is the decoupling band of Section~\ref{sec:synth}, the soft direction of
 Appendix~\ref{app:ident} made quantitative.
 
@@ -930,10 +927,10 @@ implied-vol Taylor coefficients---level $\hat\sigma(0)$, skew $\hat\sigma'(0)$, 
 $\hat\sigma''(0)$---are closed form \emph{with no Black--Scholes inversion}, by two routes.
 
 \emph{Exact: implicit differentiation.} The implied vol solves
-$C_{\mathrm{mix}}(m)=C_{\mathrm{BS}}(m,\hat\sigma(m))$ in log-moneyness $m=\log(F/K)$ (so $\partial_m=-\partial_k$ for the §\ref{sec:ssr} skew variable $k$; sign in App.~\ref{app:glide}). The level is a
-single probit of the closed-form ATM mixture price, and the higher coefficients follow by
-implicitly differentiating that identity (derived in full in Appendix~\ref{app:glide}),
-working in the \emph{total} volatility $u=\hat\sigma\sqrt{T_j}$ (the variable the Black greeks below are taken in),
+$C_{\mathrm{mix}}(m)=C_{\mathrm{BS}}(m,\hat\sigma(m))$ in log-moneyness $m=\log(F/K)$ (so $\partial_m=-\partial_k$ for the §\ref{sec:ssr} skew variable $k$; sign in App.~\ref{app:glide}). The level is a single probit of the closed-form ATM mixture price. The higher coefficients
+follow by implicitly differentiating that identity (derived in full in Appendix~\ref{app:glide}),
+working in the \emph{total} volatility $u=\hat\sigma\sqrt{T_j}$ (the variable the Black
+greeks below are taken in),
 \begin{equation}
 \begin{aligned}
 u'(0)&=\frac{\partial_m C_{\mathrm{mix}}-\partial_m C_{\mathrm{BS}}}{\mathcal V},
@@ -944,10 +941,11 @@ u''(0)=\frac{\partial_m^2 C_{\mathrm{mix}}-\partial_m^2 C_{\mathrm{BS}}
 \end{aligned}
 \label{eq:iv-implicit}
 \end{equation}
-with the \emph{total-vol} Black--Scholes greeks vega~$\mathcal V$, vanna~$\mathcal V_x$, and volga~$\mathcal V_u$ ($u$-derivatives of $C_{\mathrm{BS}}$) and
-$\partial_m^k C_{\mathrm{mix}}$ the closed-form strike-derivatives of the mixture price; the last identity annualises each coefficient. These
-are exact (numerically confirmed against the bisection-inverted IV in App.~\ref{app:glide}); the SSR $\SSR=\partial_z\hat\sigma(0)/\hat\sigma'(0)$ matches the closed-form
-realised covariance~\eqref{eq:ssr-model} to four decimals. We take \eqref{eq:iv-implicit} as the calibration
+with the \emph{total-vol} Black--Scholes greeks vega~$\mathcal V$, vanna~$\mathcal V_x$, and volga~$\mathcal V_u$ ($u$-derivatives of $C_{\mathrm{BS}}$) and $\partial_m^k C_{\mathrm{mix}}$ the closed-form strike-derivatives of the mixture price.
+The last identity annualises each coefficient. These
+are exact, numerically confirmed against the bisection-inverted IV in App.~\ref{app:glide}. The
+SSR $\SSR=\partial_z\hat\sigma(0)/\hat\sigma'(0)$ matches the closed-form realised
+covariance~\eqref{eq:ssr-model} to four decimals. We take \eqref{eq:iv-implicit} as the calibration
 targets.
 
 \emph{Leading order: cumulants.} A coarser but interpretable route reads the coefficients off
@@ -989,7 +987,7 @@ $\partial_S\widehat\sigma_{\mathrm{ATM}}=\SSR_T\,\mathcal S_T/S$, with the fixed
 smile-roll $-\mathcal S_T/S$. Hence sticky-strike ($\SSR=1$) gives
 $\partial_S\widehat\sigma(K)=0$ and recovers the Black delta, while sticky-delta
 ($\SSR=0$) gives $-\mathcal S_T/S$. A Black/sticky-strike hedge omits the $(\SSR_T-1)$
-term and bleeds systematic P\&L whenever the realised SSR departs from $1$---materially so
+term. It bleeds systematic P\&L whenever the realised SSR departs from $1$---materially so
 for SPX at short tenors---while the calibrated kernel supplies the adjustment its
 calibrated SSR implies. We name this delta \emph{SSR-consistent} rather than
 ``correct'': \eqref{eq:ssr-delta} is the analytically correct hedge \emph{for a smile
@@ -1007,8 +1005,8 @@ Black-delta hedge ($\Delta=\Delta_{\BS}$) of a strike-$K$ option, the step P\&L 
 \end{equation}
 the smile-roll term being the value change from the smile moving with spot
 ($\dd\widehat\sigma(K)=\partial_S\widehat\sigma(K)\,\dd S$). It is a \emph{first-order} exposure,
-systematic whenever $\SSR_T\ne1$, that inflates the hedging-error variance over many rebalances; the
-SSR-consistent delta~\eqref{eq:ssr-delta} folds it into the spot hedge, leaving the usual
+systematic whenever $\SSR_T\ne1$, that inflates the hedging-error variance over many rebalances.
+The SSR-consistent delta~\eqref{eq:ssr-delta} folds it into the spot hedge, leaving the usual
 gamma--theta. The companion vanna---the spot--vol cross-greek, equally closed-form---hedges the
 second-order cross: under the SSR the realised spot--vol comovement is $\SSR_T\,\mathcal S_T(\dd S)^2/S$,
 an exposure the calibrated SSR likewise pins.
@@ -1016,13 +1014,13 @@ an exposure the calibrated SSR likewise pins.
 \subsection{The forward-variance readout (VIX as the SPX instance)}
 The vol-of-vol is \emph{identified} from a readout of the underlying's forward-variance
 distribution, and enters the fit only as a soft target. Its \emph{level} is the variance-swap
-rate---a model-free integral of the underlying's own option strip, hence available for
-\emph{any} European-option underlying with no separate product---while its \emph{dispersion}
-(vol-of-vol and skew) is what a volatility-index options market prices directly; for SPX that
+rate: a model-free integral of the underlying's own option strip, hence available for
+\emph{any} European-option underlying with no separate product. Its \emph{dispersion}
+(vol-of-vol and skew) is what a volatility-index options market prices directly. For SPX that
 market is VIX, the sharpest instance. For SPX, $\VIX_T^2$ is $30$-day forward variance,
 $Y_T:=\VIX_T^2=\tfrac1\tau\E_T\!\big[\int_T^{T+\tau}v_u\dd u\big]$ with $\tau\approx 30/365$,
 a functional of the latent vol state. A factor with rate $\kappa$ is damped over the readout
-horizon by $D(\kappa)=(1-e^{-\kappa\tau})/(\kappa\tau)$; the fast factor is strongly damped
+horizon by $D(\kappa)=(1-e^{-\kappa\tau})/(\kappa\tau)$. The fast factor is strongly damped
 and the slow factor barely, so the readout is slow-dominated while short-dated smile curvature
 is fast-dominated. With $V^{\mathsf F},V^{\mathsf S}$ the fast/slow factor contributions to the
 forward variance---affine readout $Y_T=v_\infty+D_{\mathsf F}V^{\mathsf F}+D_{\mathsf S}V^{\mathsf S}$,
@@ -1054,9 +1052,9 @@ with $\bar v_k$ the forward variance carried by regime $k$: no PDE, no Monte Car
 The VIX law in~\eqref{eq:vix-atomic} is atomic because $\VIX_T=\sqrt{\bar v_k}$ is a
 deterministic function of the discrete regime; hence the VIX call is piecewise-linear
 in $K$ and the VIX digital is a step function. This is harmless under our scope, where
-VIX only \emph{identifies} the regime dispersion, and the atomic sum is a quadrature for
-that dispersion whose accuracy improves with the regime count (a discretisation, not a
-parameter, knob: the generator stays $\sim\!6$-dimensional). If a smooth VIX smile is
+VIX only \emph{identifies} the regime dispersion. The atomic sum is a quadrature for that
+dispersion, and its accuracy improves with the regime count---a discretisation knob, not a
+parameter: the generator stays $\sim\!6$-dimensional. If a smooth VIX smile is
 required, give each regime a within-regime lognormal spread,
 whereupon~\eqref{eq:vix-atomic} becomes a mixture of Black calls---at the cost of one
 vol-of-VIX parameter per regime.
@@ -1070,11 +1068,11 @@ implied vol-of-vol, computed from the closed-form regime sums~\eqref{eq:vix-atom
 \label{eq:Rvov}
 \end{equation}
 the squared mismatch of the model's forward-variance \emph{level} $v_\infty$ and \emph{vol-of-vol}
-$\xi$ to the readout, summed over the horizons $\{\tau_n\}$ (whose term structure pins $\kappa_{\mathsf{S}}$
-through the damping $D(\tau)$; a vol-of-vol-skew term is added where a vol-index smile is liquid). It is
-\emph{not} a hard marginal: we impose only \emph{unconditional} forward-variance consistency,
-$\sum_k p_k y_k=\mathrm{FV}$, which is necessary but not sufficient for full joint
-consistency---the conditional identity $y\approx\E[L_\tau\mid S,Y]$ that the joint
+$\xi$ to the readout, summed over the horizons $\{\tau_n\}$. Their term structure pins $\kappa_{\mathsf{S}}$
+through the damping $D(\tau)$, and a vol-of-vol-skew term is added where a vol-index smile is
+liquid. It is \emph{not} a hard marginal. We impose only \emph{unconditional} forward-variance
+consistency, $\sum_k p_k y_k=\mathrm{FV}$, which is necessary but not sufficient for full joint
+consistency. The conditional identity $y\approx\E[L_\tau\mid S,Y]$ that the joint
 problem~\cite{guyon2022} requires is exactly what reading rather than jointly fitting forgoes.
 
 \subsection{Extracting the readout, and what stands in for VIX}
@@ -1106,8 +1104,7 @@ curvature give $\rho$ and $\xi$ separately but \emph{fuzzily} (the soft pair of
 Appendix~\ref{app:ident}), still risk-neutral but noisy. A realised estimate optionally
 firms it up, at the cost of mixing in a real-world ($\mathbb P$) quantity. VIX simply makes
 the same $\mathbb Q$ separation sharp---the honest cost of generality. The vol-of-vol \emph{skew} (the upward VIX-smile slope) is third-order for the
-SSR and near-ATM dynamics and has no off-SPX market source, so the parsimonious kernel omits
-it; it is fitted only for VIX-pricing or deep-wing work, where SPX's liquid VIX makes it
+SSR and near-ATM dynamics and has no off-SPX market source, so the parsimonious kernel omits it. It is fitted only for VIX-pricing or deep-wing work, where SPX's liquid VIX makes it
 available.
 
 \begin{table}[h]
@@ -1155,9 +1152,9 @@ w(T)=w^{\mathrm{diff}}(T)+\!\!\sum_{t_k\le T}\!\!J_k,
 a smooth diffusive curve plus a sum of event lumps $J_k$ (the saw-tooth in the ATM
 total-variance term structure). The homogeneous kernel cannot absorb a lump: its per-step
 conditional variance is $O(\Delta)$ while $J_k$ is an $O(1)$ point mass in calendar time---this
-\emph{is} the time-homogeneity break. De-eventing strips the lumps so the homogeneous generator
-$\bth$ calibrates on the clean windows, with the event a thin separate layer; left in, a flexible
-surface silently absorbs the event premium and the term-structure interpolation can turn
+\emph{is} the time-homogeneity break. De-eventing strips the lumps, so the homogeneous generator $\bth$ calibrates on the clean
+windows and the event becomes a thin separate layer. Left in, a flexible surface silently absorbs
+the event premium, and the term-structure interpolation can turn
 calendar-arbitrageable~\cite{zhong2026,gatheraljacquier2014}.
 
 Two things must be recovered, and the established methods recover only one. Every event-vol
@@ -1172,11 +1169,9 @@ spot--vol leverage---and the second, the dynamics, is the part the literature le
 
 \subsection{The clean-flank bridge}
 Bracket the event window $[T_2,T_3]$ (the one window spanning $t_k$) by event-free windows
-$[T_1,T_2]$ and $[T_3,T_4]$---the \emph{clean flanks} that name the method. The marginals
-$\mu_1,\dots,\mu_4$ are read from the chains; on the
-clean flanks the kernel is the homogeneous diffusive kernel
-$\cK_{12}=\cK_{34}=\cK_{\mathrm{diff}}(\bth)$, so $\bth$ is identified \emph{where there is no
-event}. Time-homogeneity then fixes the middle window's diffusive counterfactual---propagate the
+$[T_1,T_2]$ and $[T_3,T_4]$---the \emph{clean flanks} that name the method. The marginals $\mu_1,\dots,\mu_4$ are read from the chains. On the clean flanks the kernel is
+the homogeneous diffusive kernel $\cK_{12}=\cK_{34}=\cK_{\mathrm{diff}}(\bth)$, so $\bth$ is
+identified \emph{where there is no event}. Time-homogeneity then fixes the middle window's diffusive counterfactual---propagate the
 pre-event marginal through the clean generator,
 \begin{equation}
 \mu_3^{\mathrm{diff}}=\cK_{\mathrm{diff}}(\bth)\,\mu_2,
@@ -1185,9 +1180,9 @@ pre-event marginal through the clean generator,
 \label{eq:deevent-bridge}
 \end{equation}
 with $\rho_J$ the event-jump law and $\ast$ convolution in log-return. The event is the gap
-$\mu_3\ominus\mu_3^{\mathrm{diff}}$. A pair of marginals alone does not pin the middle kernel;
-the bridge closes it with two ingredients held fixed---$\bth$ from the clean flanks, and a
-low-cumulant parametric ansatz for $\rho_J$.
+$\mu_3\ominus\mu_3^{\mathrm{diff}}$. A pair of marginals alone does not pin the middle kernel. The bridge closes it with two
+ingredients held fixed: $\bth$ from the clean flanks, and a low-cumulant parametric ansatz for
+$\rho_J$.
 
 \subsection{Two channels}
 The event splits along the same statics/dynamics seam as the model.
@@ -1208,19 +1203,22 @@ $\sum_m\pi^J_m e^{\mu^J_m+\frac12(\sigma^J_m)^2}=1$ keeps the de-evented and re-
 closed-form finite-mixture class.
 
 \paragraph{Dynamics: the event leverage.} The marginal $\mu_3$ does not record whether the event
-jump is \emph{correlated} with the volatility move---a joint spot--vol property, the
-event-conditional analogue of the SSR. It is read not from $\mu_3$ but from the forward-start smile
-across $[T_2,T_3]$: the realised covariance~\eqref{eq:ssr-model} evaluated on the event transition,
-the post-event ATM response $\sigma(\cdot;f',s')-\sigma(\cdot;f,s)$ weighted by the event-step
-leverage $\lambda_{\mathsf{F}},\lambda_{\mathsf{S}}$.
+jump is \emph{correlated} with the volatility move. That is a joint spot--vol property, the
+event-conditional analogue of the SSR. Algorithm~\ref{alg:deevent} carries it in one factor
+$\psi\in[0,1]$: the fraction of the flank kernel's stochastic-vol leverage
+$(\lambda_{\mathsf{F}},\lambda_{\mathsf{S}})$ that survives the release, with the local-vol skew
+floor untouched. It is read not from $\mu_3$ but from the event transition, on which the realised
+covariance~\eqref{eq:ssr-model} is evaluated rather than on the stationary chain. Where cliquets
+are quoted, $\psi$ is read risk-neutrally from the forward-start smile across $[T_2,T_3]$;
+otherwise from the realised ATM response across the release~\eqref{eq:event-delta}.
 
 \subsection{Hedging through the event}
-An event is a known-time jump, and a delta hedge cannot catch a jump; event risk is therefore an
-\emph{options} hedge, with a delta correction from the leverage, and the two channels supply both.
-The static jump sizes the \emph{gamma} leg: its variance is the second cumulant $J=\kappa_2(\rho_J)$,
-an implied one-event move $\sqrt J$ that the bridge separates from the diffusive variance and that
-sizes the event straddle, while $\kappa_3,\kappa_4$ set the directional tilt---risk-reversals or
-strangles positioned at the legs of $\rho_J$. The dynamics supply the \emph{delta} leg: the spot
+An event is a known-time jump, and a delta hedge cannot catch a jump. Event risk is therefore an
+\emph{options} hedge with a delta correction from the leverage, and the two channels supply both.
+The static jump sizes the \emph{gamma} leg. Its variance is the second cumulant
+$J=\kappa_2(\rho_J)$, an implied one-event move $\sqrt J$ that the bridge separates from the
+diffusive variance and that sizes the event straddle. The higher cumulants $\kappa_3,\kappa_4$ set
+the directional tilt: risk-reversals or strangles positioned at the legs of $\rho_J$. The dynamics supply the \emph{delta} leg: the spot
 hedge to hold \emph{through} the release is the SSR-consistent delta~\eqref{eq:ssr-delta} evaluated
 with the event-conditional SSR,
 \begin{equation}
@@ -1230,7 +1228,7 @@ with the event-conditional SSR,
 \label{eq:event-delta}
 \end{equation}
 the realised covariance~\eqref{eq:ssr-model} taken on the event transition rather than the
-stationary chain, with vanna the event spot--vol cross-hedge; a Black/sticky-strike hedge sets
+stationary chain, with vanna the event spot--vol cross-hedge. A Black/sticky-strike hedge sets
 $\SSR^{\mathrm{ev}}=1$ and bleeds the $(\SSR^{\mathrm{ev}}-1)$ term across the release. Holding that
 delta through the date, the residual attributes cleanly,
 \begin{equation}
@@ -1246,18 +1244,17 @@ gamma and event-delta legs, one coherent surface across the date, and the
 attribution~\eqref{eq:event-pnl}. The first two are standard desk de-eventing; the event-conditional
 delta and the leverage term are what the transition kernel adds over a surface-plus-jump object.
 
-The split is honest about where the value sits. For index macro events, whose priced jump is
-variance with little directional skew~\cite{zhong2026}, the hedge is dominated by the gamma leg and
-the event-conditional delta correction is small unless the leverage is non-trivial (the empirical
-question of Section~\ref{sec:deevent-synth}); for single-name earnings, whose asymmetry is
+The split is honest about where the value sits. For index macro events, whose priced jump is variance with little directional
+skew~\cite{zhong2026}, the hedge is dominated by the gamma leg. The event-conditional delta
+correction is then small unless the leverage is non-trivial---the empirical question of
+Section~\ref{sec:deevent-synth}. For single-name earnings, whose asymmetry is
 priced~\cite{alexiou2025}, the directional and event-conditional-delta legs carry more weight.
 
 \subsection{Localised Gy\"ongy, and what is and is not new}
 The bridge is the Gy\"ongy fusion~\eqref{eq:gyongy} localised to the event date: the same marginal
-match, the overlay a calendar lump rather than the full local-volatility surface. Interpolation and
-de-eventing are one homogeneity property read two ways---the semigroup composes \emph{within} an
-event-free block (Section~\ref{sec:interp}), the lump $J_k$ is the \emph{between-block} residual it
-cannot bridge. Relative to the established static de-eventing cited at the head of this section,
+match, the overlay a calendar lump rather than the full local-volatility surface. Interpolation and de-eventing are one homogeneity property read two ways. The semigroup composes
+\emph{within} an event-free block (Section~\ref{sec:interp}); the lump $J_k$ is the
+\emph{between-block} residual it cannot bridge. Relative to the established static de-eventing cited at the head of this section,
 what \eqref{eq:deevent-bridge} supplies is the dynamics: an event-conditional SSR that the
 unconditional-SSR literature does not measure. A full-surface ultra-short model that removes FOMC
 days notes this accommodation ``could be \dots\ but is beyond the objectives of the current
@@ -1269,12 +1266,13 @@ counterfactual, and the two channels into one pass.
 \label{alg:deevent}
 \begin{algorithmic}[1]
 \Require marginals on windows bracketing $t_k$: event-free flanks $[T_1,T_2],[T_3,T_4]$ and the event-spanning window $[T_2,T_3]$; the event calendar
-\Ensure the diffusive generator $\bth$, the de-evented smile $\mu_3^{\mathrm{diff}}$, the event-jump density $\rho_J$, and the event leverage
-\State \textbf{Clean fit.} Calibrate $\bth$ on the event-free flanks only (Algorithm~\ref{alg:calib} restricted to $[T_1,T_2],[T_3,T_4]$); the event-spanning window is held out.
-\State \textbf{Counterfactual.} Propagate $\mu_3^{\mathrm{diff}}=\cK_{\mathrm{diff}}(\bth)\,\mu_2$, the de-evented prediction at $T_3$.
+\Ensure the diffusive generator $\bth$, the de-evented smile $\mu_3^{\mathrm{diff}}$, the event-jump density $\rho_J$, and the event-leverage factor $\psi$
+\State \textbf{Clean fit.} Calibrate $\bth$ on the event-free flanks only (Algorithm~\ref{alg:calib} restricted to $[T_1,T_2],[T_3,T_4]$); the event-spanning window is held out, so the fit cannot absorb the event.
+\State \textbf{Counterfactual.} Anchor at the last clean marginal $\mu_2$ and apply a \emph{single} step of the flank kernel, time-rescaled to length $T_3-T_2$, with the event-free leverage evaluated at $T_2$ and held across the window, and \emph{without} recompression: $\mu_3^{\mathrm{diff}}=\cK_{\mathrm{diff}}(\bth)\,\mu_2$. Propagating from spot instead cold-starts the third moment, and recompressing a single high-skew step flattens it; either reads a skew far below the market's.
 \State \textbf{Statics.} Form the cumulant residual~\eqref{eq:deevent-cumulant} and fit a small martingale-normalised mixture $\rho_J$ (parametric deconvolution); the de-event smile is $\mu_3^{\mathrm{diff}}$, the re-evented smile $\mu_3^{\mathrm{diff}}\ast\rho_J$.
-\State \textbf{Dynamics.} Evaluate the event-conditional SSR~\eqref{eq:ssr-model} on the $[T_2,T_3]$ transition from the forward-start smile; record the event leverage.
-\State \Return $\bth,\ \mu_3^{\mathrm{diff}},\ \rho_J,\ \text{event leverage}$.
+\State \textbf{Dynamics.} Parametrise the event transition as the flank kernel with its stochastic-vol leverage scaled by a surviving fraction $\psi\in[0,1]$, $(\lambda_{\mathsf F},\lambda_{\mathsf S})\mapsto\psi\,(\lambda_{\mathsf F},\lambda_{\mathsf S})$, the local-vol skew floor untouched. Estimate $\psi$ by matching the model event-conditional SSR~\eqref{eq:ssr-model} to the measured one on $[T_2,T_3]$: risk-neutrally from the forward-start smile where cliquets are quoted, otherwise from the realised $\Delta\sigma_{\mathrm{ATM}}\!\leftrightarrow\!r$ regression across the release~\eqref{eq:event-delta}.
+\State \textbf{Compose.} The event-window transition is the leverage-suppressed diffusive kernel convolved with the event jump, $\cK_{[T_2,T_3]}=\cK_{\mathrm{diff}}(\bth;\psi)\ast\rho_J$: the statics live in $\rho_J$, the dynamics in $\psi$.
+\State \Return $\bth,\ \mu_3^{\mathrm{diff}},\ \rho_J,\ \psi$.
 \end{algorithmic}
 \end{algorithm}
 
@@ -1323,10 +1321,9 @@ VIX vol-of-vol pins the \emph{timescale} half of the soft direction (a $12\times
 regularisation), leaving the slow leverage $\lambda_{\mathsf{S}}$ for forward-start skew
 (Appendix~\ref{app:ident}).
 
-\paragraph{Exactness (Monte-Carlo)---the anchor.} The closed-form realised SSR sits within Monte-Carlo
-noise of a direct simulation ($|\mathrm{diff}|\approx0.005$ at 1m--1y; the fused SLV SSR $\le0.007$), and
-the check has teeth---an earlier source-averaged form was off by $0.105$ on a skewed target, which the
-Monte Carlo caught. The dynamic readouts are exact closed forms, not approximations, and this is what the
+\paragraph{Exactness (Monte-Carlo)---the anchor.} The closed-form realised SSR sits within Monte-Carlo noise of a direct simulation
+($|\mathrm{diff}|\approx0.005$ at 1m--1y; the fused SLV SSR $\le0.007$). The check has teeth: an
+earlier source-averaged form was off by $0.105$ on a skewed target, which the Monte Carlo caught. The dynamic readouts are exact closed forms, not approximations, and this is what the
 real-data residuals are read against. With the machinery proven exact here, the regime-dependence and
 two-factor ceiling on real chains (Section~\ref{sec:realdata}) are properties of the data and the model's
 scope, not numerical error.
@@ -1345,10 +1342,10 @@ Because $\lambda_{\mathsf{F}},\lambda_{\mathsf{S}}$ enter only the transitions, 
 one-step spot marginal, the event-horizon marginal is \emph{exactly} unchanged
 ($|\Delta\mathrm{var}|=|\Delta\mathrm{skew}|=0$ to machine precision) while the forward-start SSR moves
 monotonically with the injected leverage (Figure~\ref{fig:deevent-nr}). The event leverage is thus
-identifiable, yet \emph{provably invisible} to any static de-eventing. It is the non-redundant degree of
-freedom the dynamics channel adds over the static literature, and it is what licenses reading the
-real-data SSR \emph{suppression} (Section~\ref{sec:realdata}: the same curve, on its leverage-down side)
-as a genuine dynamics signal rather than a static-variance artifact. A symmetric martingale variance jump, meanwhile,
+identifiable, yet \emph{provably invisible} to any static de-eventing. It is the non-redundant degree of freedom the dynamics channel adds over the static
+literature. It is also what licenses reading the real-data SSR \emph{suppression}
+(Section~\ref{sec:realdata}: the same curve, on its leverage-down side) as a genuine dynamics
+signal rather than a static-variance artifact. A symmetric martingale variance jump, meanwhile,
 reproduces the index-macro ``variance, not skew'' fact~\cite{zhong2026} and leaves this leverage signal
 intact.
 
@@ -1431,23 +1428,24 @@ limit---its vol-of-vol
 term structure cannot flatten at the short-mid the way those regimes priced (Table~\ref{tab:crossregime},
 Figure~\ref{fig:real-offspx}a). The \emph{grind} of
 2022--2023 is no exception: its realised SSR is normal (${\approx}1.25$--$1.30$), and the 2022 and 2023 SSR$+$vov
-fits reach SSR RMS $3.2\%$ and $9.2\%$ (moderate). The residual sits in the VIX vol-of-vol (both
-${\approx}22\%$)---the two-factor vov shape ceiling (a vov term structure the two-OU kernel cannot flatten at
-the short--mid), more severe than in the 2020 high-vol regime ($9\%$), not an SSR misfit. \emph{And the
+fits reach SSR RMS $3.2\%$ and $9.2\%$ (moderate). The residual sits in the VIX vol-of-vol (both ${\approx}22\%$): the same two-factor vov shape
+ceiling, more severe here than in the 2020 high-vol regime ($9\%$), and not an SSR misfit. \emph{And the
 vol-of-vol target does not tax the SSR:} on the 2022 grind, a $25\times$ increase in the weight on the
 vol-of-vol term leaves the SSR RMS within $2.3$--$3.2\%$, so reading the vol-of-vol off the imperfect VIX
 target costs nothing on the primary SSR fit. For from-spot
 outputs the exact second-order leverage~\eqref{eq:gyongy} is retained: the spot-conditional
 $\E[\nu\mid z{=}0]\approx0.7$ (not $1$) lifts the accumulated from-spot ATM level by ${\sim}10\%$ in vol.
 
-\paragraph{Off-SPX generalisation (NDX).} The model travels off SPX with \emph{own-strip and realised targets
-only}, no vol-index options: NDX statics from its own SANOS marginals, the leverage from its realised SSR, and
-the vol-of-vol from the realised variance-of-variance of its own model-free variance-swap strip (the graded
-readout of Section~\ref{sec:ssr}; validated in that the reconstructed SPX $\sqrt V$ tracks the VIX index).
-Across 2018--2022, with multi-start, NDX calibrates to $5$--$12\%$ SSR and $1$--$8\%$ vol-of-vol (bar the
-$2021$ vov shape ceiling, ${\sim}19\%$)---weaker than SPX in \emph{both} blocks (its SSR RMS runs roughly
-double SPX's in matched years, $2018$/$2020$), as expected from the purely physical-measure realised readout
-(no vol-index, no risk-neutral target) and its ${\sim}10\%$ reconstruction bias. Cross-sectionally NDX's vol-of-vol
+\paragraph{Off-SPX generalisation (NDX).} The model travels off SPX with \emph{own-strip and realised targets only}, no vol-index
+options. NDX statics come from its own SANOS marginals, the leverage from its realised SSR, and the
+vol-of-vol from the realised variance-of-variance of its own model-free variance-swap strip. That
+last is the graded readout of Section~\ref{sec:ssr}, validated in that the reconstructed SPX
+$\sqrt V$ tracks the VIX index.
+Across 2018--2022, with multi-start, NDX calibrates to $5$--$12\%$ SSR and $1$--$8\%$
+vol-of-vol (bar the $2021$ vov shape ceiling, ${\sim}19\%$). That is weaker than SPX in
+\emph{both} blocks---its SSR RMS runs roughly double SPX's in matched years, $2018$/$2020$---as
+expected from the purely physical-measure realised readout (no vol-index, no risk-neutral target)
+and its ${\sim}10\%$ reconstruction bias. Cross-sectionally NDX's vol-of-vol
 (${\sim}1.5$) exceeds SPX's (${\sim}1.2$)---tech is a jumpier vol process---and its marginal is modestly
 fat-tailed (${\sim}2$--$3\times$ the data's excess kurtosis), a discretisation feature. The own-strip
 curvature was tested as a vol-of-vol backbone and kept as a diagnostic, not a fit target
@@ -1493,23 +1491,23 @@ the accumulated from-spot ATM level toward the realised.}
 The same exact-$\beta$ readout, taken across the whole at-the-money neighbourhood rather than at the level
 alone, places the calibrated model on the sticky map (the convention of Section~\ref{sec:ssr}) in two
 independent coordinates (Figure~\ref{fig:dynamics}). The \emph{level} rides with spot at the SSR,
-$\partial_{\ln S}\sigma_{\mathrm{ATM}}=\SSR\,\mathcal S$, with $\SSR$ running from $2.0$ at one week down to
-$1.4$ at three months: far from sticky-moneyness ($\SSR{=}0$), between sticky-strike ($1$) and the local-vol
-limit ($2$), and on the Doeff--Kamal $H{+}\tfrac32$ backbone through the belly. The \emph{shape}, by contrast,
-barely moves---the skew's own response $\partial_{\ln S}\mathcal S$, normalised by the rate at which a
-strike-pinned smile would swing it (twice the curvature), is only $0.01$--$0.02$: the skew is essentially
-\emph{frozen in moneyness} (sticky-moneyness \emph{in shape}), with a small, realistic steepening on sell-offs.
+$\partial_{\ln S}\sigma_{\mathrm{ATM}}=\SSR\,\mathcal S$, with $\SSR$ running from $2.0$ at one
+week down to $1.4$ at three months. That is far from sticky-moneyness ($\SSR{=}0$), between
+sticky-strike ($1$) and the local-vol limit ($2$), and on the Doeff--Kamal $H{+}\tfrac32$ backbone
+through the belly. The \emph{shape}, by contrast, barely moves. The skew's own response
+$\partial_{\ln S}\mathcal S$, normalised by the rate at which a strike-pinned smile would swing it
+(twice the curvature), is only $0.01$--$0.02$. The skew is essentially \emph{frozen in moneyness}
+(sticky-moneyness \emph{in shape}), with a small, realistic steepening on sell-offs.
 So the model reproduces the textbook equity picture---the smile \emph{shape} translates with spot while its
 \emph{level} lifts on sell-offs (Figure~\ref{fig:dynamics}b: the one-month smile shifts up nearly in parallel on
 a $1\%$ drop, unlike the flat sticky-moneyness or the tilted sticky-strike responses). This is also why the
 SSR-consistent delta is the right hedge: with the shape sticky and only the level riding, the whole hedging
 problem collapses to folding in that level move---the $\SSR$---which is exactly what~\eqref{eq:ssr-delta} does.
 
-The frozen shape, however, is as much a \emph{structural constraint} as an empirical match. By translation
-invariance (Section~\ref{sec:invariance}) the conditional smile depends on the volatility regime alone, not
-on the spot level, so the shape can respond to a spot move only \emph{indirectly}---through the
-leverage-induced regime shift, where a down move tilts the regime toward higher, steeper-skew vol (the small
-sell-off steepening above). A \emph{deterministic, spot-level-dependent} shape---a smile intrinsically
+The frozen shape, however, is as much a \emph{structural constraint} as an empirical match. By translation invariance (Section~\ref{sec:invariance}) the conditional smile depends on the
+volatility regime alone, not on the spot level. So the shape can respond to a spot move only
+\emph{indirectly}, through the leverage-induced regime shift: a down move tilts the regime toward
+higher, steeper-skew vol (the small sell-off steepening above). A \emph{deterministic, spot-level-dependent} shape---a smile intrinsically
 steeper at lower index levels, beyond that stochastic-regime channel---is outside the model's reach: the same
 invariance that makes the SSR an exact closed form forbids it. So where the data carry such second-order,
 level-dependent skew dynamics, the ``shape sticks'' finding is a property of the construction as much as of
@@ -1531,48 +1529,63 @@ while the level rides.}
 The clean-flank bridge recovers \emph{both} channels of Section~\ref{sec:deevent}, split along the
 statics/dynamics seam. On the daily-grid era (2022--2024, $48$ FOMC$+$CPI events vs $30$ clean controls
 ${\ge}5$ days from any release), the counterfactual $\mu_3^{\mathrm{diff}}$ is a \emph{single} time-rescaled step
-from the last clean $\mu_2$ (Alg.~\ref{alg:deevent}, step~2), taken \emph{without} recompression. A from-spot
-propagation would instead cold-start the third moment---it builds skew from a point mass over many steps, each
-recompression shaving it, so at the short event horizon it reads skew ${\approx}{-}0.8$ against a market
-${\approx}{-}2.4$---whereas anchoring on $\mu_2$ inherits the skew directly. The event jump is then a clean
+from the last clean $\mu_2$ (Alg.~\ref{alg:deevent}, step~2), taken \emph{without} recompression. A from-spot propagation would instead cold-start the third moment. It builds skew from a point
+mass over many steps, each recompression shaving it, so at the short event horizon it reads skew
+${\approx}{-}0.8$ against a market ${\approx}{-}2.4$. Anchoring on $\mu_2$ inherits the skew
+directly. The event jump is then a clean
 variance lump: the implied move $\sqrt J$ ($J{=}\kappa_2$ of $\rho_J$) is ${\approx}1\%$ on events vs
 ${\approx}0.6\%$ on controls, consistent with the term-structure lump~\eqref{eq:deevent-split}, and carries
-\emph{no} directional skew. Reading the residual asymmetry at \emph{matched} variance (the lump set to the
-exact $\kappa_2$ residual~\eqref{eq:deevent-cumulant}, so the two smiles share a second moment and only shape
-can differ) leaves a large but \emph{event-independent} put-skew deficit: $t{\approx}8$ on events and controls
-alike---the transition-side shape error of a single-step, instantaneous-Gy\"ongy counterfactual
-(\S\ref{sec:fusion}, which pins marginals not the transition)---with net event-minus-control $t{\approx}{-}0.7$. That is ``variance, not skew''~\cite{zhong2026} on index macro, confirmed
+\emph{no} directional skew. Read at \emph{matched} variance---the lump set to the exact $\kappa_2$
+residual~\eqref{eq:deevent-cumulant}, so the two smiles share a second moment and only shape can
+differ---the residual asymmetry is a large but \emph{event-independent} put-skew deficit,
+$t{\approx}8$ on events and controls alike. That common deficit is the transition-side shape error
+of a single-step, instantaneous-Gy\"ongy counterfactual (\S\ref{sec:fusion}, which pins marginals
+not the transition); the net event-minus-control is $t{\approx}{-}0.7$. That is ``variance, not skew''~\cite{zhong2026} on index macro, confirmed
 and robust to the counterfactual construction.
 
 \paragraph{Real-SPX de-eventing, dynamics: a switched-off event leverage.}
-The signature the static literature cannot form is in the dynamics. For FOMC and nonfarm-payroll
-releases the event-conditional SSR---the realised
+The signature the static literature cannot form is in the dynamics. For FOMC and nonfarm-payroll releases the event-conditional SSR---the realised
 $\Delta\sigma_{\mathrm{ATM}}\!\leftrightarrow\!r$ slope across the announcement
-transition~\eqref{eq:event-delta}---is \emph{significantly suppressed} in normal regimes: across
-2015--2019 it falls from a clean ${\approx}2.2$ to ${\approx}0.9$ at one week (FOMC
-$\mathrm{dSSR}{\approx}{-}1.4$, payrolls ${\approx}{-}0.7$; pooled heteroskedasticity-robust
-$t{\approx}3.7$, stable under an $|r|$-crush control)---the smile dropping from near local-vol
-toward sticky-strike on the release. CPI shows \emph{no} suppression in that low-inflation era
+transition~\eqref{eq:event-delta}---is \emph{significantly suppressed} in normal regimes. Across
+2015--2019 it falls from a clean ${\approx}2.2$ to ${\approx}0.9$ at one week: FOMC
+$\mathrm{dSSR}{\approx}{-}1.4$, payrolls ${\approx}{-}0.7$, pooled heteroskedasticity-robust
+$t{\approx}3.7$, stable under an $|r|$-crush control. The smile drops from near local-vol toward
+sticky-strike on the release. CPI shows \emph{no} suppression in that low-inflation era
 ($\mathrm{dSSR}{\approx}0$, $t{\approx}0.5$); it became the dominant macro surprise only in
-2021--22, inside the grind regime below. Calibrated back into the kernel, the event bump
-reproduces the suppression by driving the stochastic-vol leverage
-$(\lambda_{\mathsf F},\lambda_{\mathsf S})$ to zero, and with it the SSR's stochastic-vol component
-(${\approx}{+}0.4\to{\approx}0$). The event \emph{switches off} the spot--vol leverage rather than
-adding skew---the kernel-native degree of freedom the marginal provably cannot carry
-(Section~\ref{sec:deevent-synth}). The two halves are complementary: a symmetric
-variance jump the static literature already prices, and a switched-off event leverage only the
-transition kernel measures.
+2021--22, inside the grind regime below. Calibrated back into the kernel, the event bump reproduces this by driving the
+event-leverage factor $\psi$ of Algorithm~\ref{alg:deevent} to zero, and with it the SSR's
+stochastic-vol component (${\approx}{+}0.4\to{\approx}0$; Figure~\ref{fig:ssr-eta}). The release
+\emph{switches off} the spot--vol leverage rather than adding skew. That is the kernel-native
+degree of freedom the marginal provably cannot carry (Section~\ref{sec:deevent-synth}), and the
+complement to the symmetric variance jump the static literature already prices.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{figs/ssr_eta_switchoff.pdf}
+\caption{The release switches off the spot--vol leverage. \textbf{(a)}~\emph{Mechanism.} Scaling the
+stochastic-vol leverage couplings by a surviving fraction $\psi\in[0,1]$, $(\lambda_{\mathsf F},\lambda_{\mathsf S})\mapsto\psi\,(\lambda_{\mathsf
+F},\lambda_{\mathsf S})$ in the calibrated kernel (2017-07-03, a steep-leverage normal-regime date,
+full-objective $\bth$) sweeps the one-week SSR from its clean value $1.57$ at $\psi{=}1$ down to a floor
+$0.92$ at $\psi{=}0$---a fall of $0.65$, of which the flat-leverage stochastic-vol component is $0.40$. The
+realised FOMC event SSR, $0.88$, sits at that $\psi{=}0$ floor. \textbf{(b)}~\emph{Empirics.} The realised
+event-conditional SSR (SPX 2015--2019, $1240$ days): FOMC falls $2.18\!\to\!0.88$
+($\mathrm{dSSR}={-}1.34$, $t=3.5$), payrolls partially ($-0.67$, $t=4.0$), and CPI not at all ($+0.27$,
+$t={-}0.7$) in that low-inflation era. The kernel reproduces the mechanism and the magnitude of the
+suppression, not the absolute level---its clean SSR runs $0.61$ below the realised clean---so the realised
+levels are not mapped to a per-type $\psi$.}
+\label{fig:ssr-eta}
+\end{figure}
 
 \paragraph{Hedging: the SSR-consistent delta.}
 The ``better delta'' claim---the centrepiece---is a historical replay. We delta-hedge a rolling
 one-month ATM SPX option once per day over the one-parameter family
 $\Delta(R)=\Delta_{\mathrm{BS}}+\mathrm{Vega}\cdot R\,\mathcal{S}/S$~\eqref{eq:ssr-delta}, which spans the
 standard deltas: $R{=}0$ is Black (sticky-strike), $R{=}-1$ is sticky-delta, and $R$ equal to the SSR is the
-minimum-variance delta. The one-day hedging-P\&L variance is minimised at $R^\star$ equal to the
-\emph{realised} SSR, and the SSR-consistent delta cuts it sharply below Black
-(Figure~\ref{fig:hedge}, Table~\ref{tab:hedge}): across 2016--2021, $R^\star\approx1.5$--$1.8$, tracking the
-realised SSR ($1.3$--$1.6$), and hedging at the model's structural $R{=}1.6$ reduces the realised hedging
-variance by \textbf{27--47\%} versus Black. Sticky-delta ($R{=}-1$) is \emph{worse} than Black---it moves the
+minimum-variance delta. The one-day hedging-P\&L variance is minimised at $R^\star$ equal to the \emph{realised} SSR,
+and the SSR-consistent delta cuts it sharply below Black (Figure~\ref{fig:hedge},
+Table~\ref{tab:hedge}). Across 2016--2021, $R^\star\approx1.5$--$1.8$, tracking the realised SSR
+($1.3$--$1.6$); hedging at the model's structural $R{=}1.6$ reduces the realised hedging variance
+by \textbf{27--47\%} versus Black. Sticky-delta ($R{=}-1$) is \emph{worse} than Black---it moves the
 delta with the vol--spot comovement the wrong way. Two honest readings temper the headline. That a
 skew-adjusted delta beats Black on an equity index is the \emph{expected} minimum-variance-delta
 effect~\cite{bergomi2016,hullwhite2017}. The replay's content is its size and stability at a fixed,
@@ -1580,13 +1593,13 @@ option-implied $R$. And the replay does not yet isolate the model's value-add ov
 alternative---a trailing \emph{realised}-SSR delta, which would plausibly track $R^\star$ as well. Whether
 the model's forward-looking $R$ forecasts next-period comovement better than that backward-looking
 estimate is the decisive head-to-head, listed below. This edge is a \emph{normal-regime} property: it scales with
-the realised SSR, so it is largest in calm/moderate markets ($\SSR\approx\tfrac32$). The reduction is out-of-sample (a fixed structural $R$, not
-re-fit to each hedging window) and survives transaction costs at SPX liquidity: the vol-adjustment term raises
-turnover, but by a small fraction of the variance it removes, and a smoothed model skew (in place of the raw
-per-day skew used here) would cut that turnover further. \emph{Still to come:} the full study extends this across
-moneyness and tenor with tail-loss and cost-curve detail, ablates the VIX layer, the two-timescale memory,
-and the SSR target, and runs the real-data analogues of the Section~\ref{sec:synth} checks (the Monte-Carlo
-SSR regression; the identifiability gain of Appendix~\ref{app:ident} on the real readout).
+the realised SSR, so it is largest in calm/moderate markets ($\SSR\approx\tfrac32$). The reduction is out-of-sample---a fixed structural $R$, not re-fit to each hedging
+window---and survives transaction costs at SPX liquidity. The vol-adjustment term raises turnover,
+but by a small fraction of the variance it removes, and a smoothed model skew (in place of the raw
+per-day skew used here) would cut that turnover further. \emph{Still to come:} the full study extends this across moneyness and tenor, with tail-loss
+and cost-curve detail. It ablates the VIX layer, the two-timescale memory, and the SSR target. And
+it runs the real-data analogues of the Section~\ref{sec:synth} checks: the Monte-Carlo SSR
+regression, and the identifiability gain of Appendix~\ref{app:ident} on the real readout.
 
 \begin{table}[htbp]
 \centering{\small
@@ -1624,10 +1637,10 @@ tails, not only the ATM level---is a richer risk-neutral reading of the vol-of-v
 VIX law (Sec.~\ref{sec:ssr}) prices it across strikes with no new machinery, tightening the vol-of-vol
 identification, though---being vol-of-vol---it is \emph{complementary to, not a substitute for}, the leverage
 that carries the SSR. Second, the \emph{forward-start} smile skew is the clean risk-neutral observable of the
-spot--vol leverage: it pins the slow leverage $\lambda_{\mathsf S}$ that vol-of-vol leaves soft
-(Appendix~\ref{app:ident}) and would supersede the realised-SSR (physical-measure) proxy used here---but it
-requires traded forward-start / cliquet quotes, which are over-the-counter and absent from listed-option
-feeds (ORATS included), so this route is contingent on data. Together these carry the calibration from ATM- to
+spot--vol leverage. It pins the slow leverage $\lambda_{\mathsf S}$ that vol-of-vol leaves soft
+(Appendix~\ref{app:ident}), and it would supersede the realised-SSR (physical-measure) proxy used
+here. But it requires traded forward-start / cliquet quotes, which are over-the-counter and absent
+from listed-option feeds (ORATS included), so this route is contingent on data. Together these carry the calibration from ATM- to
 full-smile dynamics, of interest for cliquet and forward-volatility pricing.
 
 %=============================================================================
@@ -1638,26 +1651,24 @@ With the construction and the empirical results in hand, we can be precise about
 SANOS-Evolve buys over classical SLV, which already matches vanilla marginals and produces
 smile dynamics.
 
-The differentiator, previewed in Section~\ref{sec:intro}, is the SSR. The documented rigidity
-of the calibrated stochastic-volatility family~\cite{bourgey2024,frizgatheral2024} is
-established for the \emph{pure} SV class, but it transfers to classical SLV: the leverage is
-\emph{consumed} matching the vanilla smile, so the residual spot--vol dynamics---and hence the
-SSR---falls to the stochastic-volatility backbone~\cite{bergomi2017,guyonhl2012}, and an SLV on
-a standard backbone inherits the same band. SANOS-Evolve is itself a discrete SLV, so its
-escape cannot come from the leverage---it comes from the \emph{backbone}: a discrete
-regime-transition kernel whose two-timescale innovation leverage shapes the SSR term structure
-directly while the SANOS LP holds the marginals fixed; the calibration of
-Section~\ref{sec:experiments} realises this on the empirical SPX term structure.
+The differentiator, previewed in Section~\ref{sec:intro}, is the SSR. The documented rigidity of the calibrated stochastic-volatility
+family~\cite{bourgey2024,frizgatheral2024} is established for the \emph{pure} SV class, but it
+transfers to classical SLV. The leverage is \emph{consumed} matching the vanilla smile, so the
+residual spot--vol dynamics---and hence the SSR---falls to the stochastic-volatility
+backbone~\cite{bergomi2017,guyonhl2012}. An SLV on a standard backbone inherits the same band. SANOS-Evolve is itself a discrete SLV, so its escape cannot come from the leverage. It comes
+from the \emph{backbone}: a discrete regime-transition kernel whose two-timescale innovation
+leverage shapes the SSR term structure directly, while the SANOS LP holds the marginals fixed. The
+calibration of Section~\ref{sec:experiments} realises this on the empirical SPX term structure.
 
 The differences are \emph{not} approximation power---both are universal at the marginal (SLV
 through a nonparametric leverage function; SANOS-Evolve through $W_1$-dense Gaussian-mixture
 marginals and a sufficiently rich kernel). They are \emph{where the structure sits} and
 \emph{whether the dynamics are controlled}. Classical SLV sits on the other side of each
 contribution of Section~\ref{sec:intro}. Its SSR is whatever the stochastic-volatility backbone
-produces, not a target. Its leverage is a fixed point of the calibration, so re-tuning the
-dynamics re-triggers it, and it can fail outright when vol-of-vol is large (the leverage
-$\sigma_{LV}^2=\sigma_{\mathrm{Dupire}}^2/\E[V\mid S]$ diverging), whereas the admissible set here
-is never empty (Strassen, Theorem~\ref{thm:noarb}). Its Monte-Carlo particle noise (worst in the
+produces, not a target. Its leverage is a fixed point of the calibration, so re-tuning the dynamics re-triggers it,
+and it can fail outright when vol-of-vol is large---the leverage
+$\sigma_{LV}^2=\sigma_{\mathrm{Dupire}}^2/\E[V\mid S]$ diverging. The admissible set here is never
+empty (Strassen, Theorem~\ref{thm:noarb}). Its Monte-Carlo particle noise (worst in the
 wings, seed-dependent day to day) or PDE grid error sits inside the hedge ratios, where our
 mixture pricing is deterministic. And its dynamics live in a nonparametric leverage surface,
 against our nine interpretable knobs and latent regimes.
@@ -1666,16 +1677,15 @@ against our nine interpretable knobs and latent regimes.
 The two layers make opposite choices, on purpose. The static layer is universal: $W_1$-dense
 Gaussian mixtures (Appendix~\ref{app:density}) fit \emph{any} arbitrage-free smile exactly---a
 structural guarantee, not a fitted approximation---so the smile match is never the binding
-constraint. The dynamic layer is parsimonious: the small propagation residual
-$d(\mu_j\cK_j,\mu_{j+1})$ is a modelling choice, not a wall (a denser kernel, $W_1$-universal
-too, shrinks it toward zero), and a few knobs pin the dynamics to interpretable regimes where
-an unconstrained kernel would leave them underdetermined. Admissibility is exact regardless of
+constraint. The dynamic layer is parsimonious. The small propagation residual
+$d(\mu_j\cK_j,\mu_{j+1})$ is a modelling choice, not a wall: a denser kernel, $W_1$-universal too,
+shrinks it toward zero. And a few knobs pin the dynamics to interpretable regimes where an
+unconstrained kernel would leave them underdetermined. Admissibility is exact regardless of
 the residual (Remark~\ref{rem:fitproject}: the leverage carries the statics, recompression
-re-locks the martingale). What lets universality and parsimony coexist is
-translation-invariance: exact marginal match, few interpretable parameters, and exact
-closed-form closure---jointly unsatisfiable for a \emph{state-dependent} kernel---hold together
-because the translation-invariant kernel has exact Gaussian-mixture closure on the
-parsimonious generator.
+re-locks the martingale). What lets universality and parsimony coexist is translation-invariance. Exact marginal match,
+few interpretable parameters, and exact closed-form closure are jointly unsatisfiable for a
+\emph{state-dependent} kernel. They hold together here because the translation-invariant kernel has
+exact Gaussian-mixture closure on the parsimonious generator.
 
 \paragraph{Honest costs.} The model is discrete, so continuously-monitored barriers need
 sub-stepping. Recompression keeps the component budget finite (a computational cost, not an
@@ -1770,27 +1780,25 @@ training). Citations are representative, not exhaustive.}
 
 \paragraph{Outlook: intraday and 0DTE.}\label{sec:intraday}
 Same-day-expiry (``0DTE'') options are now a majority of S\&P~500 option volume, and the
-construction ports there by \emph{scale invariance}. The marginal mixtures, the kernel, and
-recompression and interpolation (Secs.~\ref{sec:recompress},~\ref{sec:interp}) are
-clock-agnostic, so rescaling the two Ornstein--Uhlenbeck timescales---fast
-$\kappa_{\mathsf{F}}$ in minutes, slow $\kappa_{\mathsf{S}}$ in hours---re-targets the model at
-the 0DTE surface. Its natural dynamic target is the \emph{intraday} SSR: by the same
+construction ports there by \emph{scale invariance}. The marginal mixtures, the kernel, and recompression and interpolation
+(Secs.~\ref{sec:recompress},~\ref{sec:interp}) are clock-agnostic. Rescaling the two
+Ornstein--Uhlenbeck timescales---fast $\kappa_{\mathsf{F}}$ in minutes, slow $\kappa_{\mathsf{S}}$
+in hours---re-targets the model at the 0DTE surface. Its natural dynamic target is the \emph{intraday} SSR: by the same
 $D(\kappa T)$ damping that makes VIX slow-dominated, a minute/hour vol factor is averaged out
 of any multi-day option and is visible only there. A genuine intraday model needs three localized
 additions---a time-of-day seasonality $\phi(u)$, scheduled-event martingale jumps (the
-de-eventing layer of Sec.~\ref{sec:deevent} at intraday resolution), and a terminal/pin
-refinement as $T\to0$---plus synchronized intraday NBBO data; we leave the empirical 0DTE
-study to a dedicated sequel.
+de-eventing layer of Sec.~\ref{sec:deevent} at intraday resolution), and a terminal/pin refinement as $T\to0$---plus synchronized intraday NBBO data. We leave the
+empirical 0DTE study to a dedicated sequel.
 
 %=============================================================================
 \section{Conclusion}
 \label{sec:conclusion}
 %=============================================================================
 
-SANOS-Evolve keeps the part of the option-surface problem that SANOS already solves
-well---arbitrage-free marginals, the local-volatility content---and evolves it into a
-stochastic-local-volatility model by fitting a martingale transition kernel with a
-latent two-timescale volatility regime. The marginals stay strictly arbitrage-free, and the
+SANOS-Evolve keeps the part of the option-surface problem that SANOS already solves well:
+arbitrage-free marginals, the local-volatility content. It evolves that into a
+stochastic-local-volatility model by fitting a martingale transition kernel with a latent
+two-timescale volatility regime. The marginals stay strictly arbitrage-free, and the
 kernel supplies the smile dynamics that local volatility gets wrong. The SSR is an exact
 closed-form realised covariance of return and regime, and the vol-of-vol is identified---not
 jointly fitted---from a forward-variance readout: VIX for SPX, but recoverable from any
@@ -1881,10 +1889,9 @@ of finite first spot-moment; by Kantorovich--Rubinstein and~\eqref{eq:w1},
 =\big\|C_\mu-C_\nu\big\|_{\dot W^{1,1}},
 \]
 the aggregate digital mispricing---\emph{exactly the band-loss the calibration minimises}
-(Section~\ref{sec:rung}). Weak\(^*\) convergence is strictly too weak here: the call payoff
-$(s-k)^+$ and the forward $s$ are continuous but \emph{unbounded}, hence not weak\(^*\) test
-functions, so mass escaping to the tail moves prices while the marginal is held fixed against the
-bounded-continuous $C_b$. Wasserstein-$1$ is precisely weak\(^*\) \emph{plus} the
+(Section~\ref{sec:rung}). Weak\(^*\) convergence is strictly too weak here. The call payoff $(s-k)^+$ and the forward
+$s$ are continuous but \emph{unbounded}, hence not weak\(^*\) test functions. So mass escaping to
+the tail moves prices while the marginal is held fixed against the bounded-continuous $C_b$. Wasserstein-$1$ is precisely weak\(^*\) \emph{plus} the
 uniformly-integrable first moment that pins the forward and the option values. The martingale
 constraint is the single linear condition $\langle\rho,s\rangle=F$.
 
@@ -1976,35 +1983,34 @@ stronger claim that the mixture class matches \emph{any} admissible transition.
 %=============================================================================
 
 The marginals do not pin the kernel, so it is fair to ask whether the generator $\bth$ is
-identifiable from the data a desk has. Because every observable is closed-form in $\bth$,
-this is a finite calculation: the elasticity-scaled Jacobian
-$\tilde J_{ij}=(\partial O_i/\partial\bth_j)\,|\bth_j|/|O_i|$ at the calibrated
-$\bth^\star$, over nine observables (ATM vol @ 1m,1y; ATM skew @ 1m,1y; curvature @ 1m;
-$\SSR$ @ 1m,3m,6m,1y), has singular values
+identifiable from the data a desk has. Because every observable is closed-form in $\bth$, this is a finite calculation. Form the
+elasticity-scaled Jacobian $\tilde J_{ij}=(\partial O_i/\partial\bth_j)\,|\bth_j|/|O_i|$ at the
+calibrated $\bth^\star$, over nine observables (ATM vol @ 1m,1y; ATM skew @ 1m,1y; curvature @ 1m;
+$\SSR$ @ 1m,3m,6m,1y). Its singular values are
 \begin{equation}
 \sigma=(5.05,\,2.96,\,1.09,\,0.59,\,0.28,\,0.19,\,\mathbf{0.059},\,\mathbf{0.011},\,\mathbf{0.000}).
 \end{equation}
 Seven stiff directions, then a gap to two near-flat ones: \textbf{effective rank
 $\approx 7/9$} at a $1\%$ threshold (full algebraic rank, but condition number $\sim\!10^4$).
-The softest singular vector loads on $\lambda_{\mathsf{S}},\kappa_{\mathsf{S}},\lambda_{\mathsf{F}},\nu_{\mathsf{F}}$---the
-\emph{SSR-shaping subspace}: the four leverage/timescale knobs that let the kernel fit the
-SSR are not separately identified by a single date's smile and SSR term structure, because
-the SSR curve is too smooth to resolve the fast/slow split (this is \emph{not} the skew
-$\rho\xi$ pair, which here stays stiff). The level, the vol-of-vol/curvature, the skew, and
+The softest singular vector loads on
+$\lambda_{\mathsf{S}},\kappa_{\mathsf{S}},\lambda_{\mathsf{F}},\nu_{\mathsf{F}}$: the
+\emph{SSR-shaping subspace}. Those four leverage/timescale knobs let the kernel fit the SSR, but
+they are not separately identified by a single date's smile and SSR term structure, because the SSR
+curve is too smooth to resolve the fast/slow split. (This is \emph{not} the skew $\rho\xi$ pair,
+which here stays stiff.) The level, the vol-of-vol/curvature, the skew, and
 the SSR \emph{level} are well-pinned; the fast-vs-slow SSR \emph{decomposition} is the soft
 direction---the honest cost of the model's flexibility, and the price of a \emph{right} SSR.
 (The spot-coupled six-knob variant was better-conditioned, cond $\approx 19$, but
 only because its pinned long-end SSR was the wrong shape.)
 
 \paragraph{Resolving the soft direction.} To pin the fast/slow split, add a dynamic
-instrument the SSR term structure alone cannot carry. The closed-form VIX vol-of-vol term
-structure---$\mathrm{VIXvov}(\tau)$, the stationary-$\pi$ dispersion of the $\tau$-forward
-vol, a finite sum over the regime grid---does most of it: adding $\mathrm{VIXvov}$ at $30$
-and $90$ days to the nine observables drops the condition number from $\sim\!10^4$ to
-$\sim\!840$ (a $12\times$ regularisation, $\sigma_9$ up $15\times$). It resolves the
-\emph{timescale} half (the $\kappa,\nu$ block) but is structurally blind to the leverages
-(forward-\emph{variance} dispersion does not see $\lambda$), so the residual soft direction
-is the slow leverage $\lambda_{\mathsf{S}}$, which forward-start skew---not vol-of-vol---must pin. The
+instrument the SSR term structure alone cannot carry. The closed-form VIX vol-of-vol term structure does most of it: $\mathrm{VIXvov}(\tau)$, the
+stationary-$\pi$ dispersion of the $\tau$-forward vol, a finite sum over the regime grid. Adding
+$\mathrm{VIXvov}$ at $30$ and $90$ days to the nine observables drops the condition number from
+$\sim\!10^4$ to $\sim\!840$---a $12\times$ regularisation, $\sigma_9$ up $15\times$. It resolves the \emph{timescale} half (the $\kappa,\nu$ block) but is structurally blind to the
+leverages: forward-\emph{variance} dispersion does not see $\lambda$. So the residual soft
+direction is the slow leverage $\lambda_{\mathsf{S}}$, which forward-start skew---not
+vol-of-vol---must pin. The
 two dynamic instruments are complementary, not interchangeable.
 
 \paragraph{Decoupling: the positive face.} The same soft direction is the statics/dynamics
@@ -2015,11 +2021,10 @@ statics ($\approx[0.93,1.02]$) is reported in Section~\ref{sec:synth} (Figure~\r
 
 \paragraph{Two limits.} The statement is \emph{local}, and it settles identifiability of the
 parameters \emph{if} the market has this structure---not whether the kernel \emph{fits} the
-market (fit quality, Section~\ref{sec:experiments}). Off-SPX, with no volatility-index
-options, the timescale split is separated only weakly---by the chain's own curvature and a
-realized estimate---so the $(\lambda,\kappa)$ block is the fragile part when the readout is
-poor; where data is thin, regularise it (a prior on the timescales) rather than floating all
-nine knobs.
+market (fit quality, Section~\ref{sec:experiments}). Off-SPX, with no volatility-index options, the timescale split is separated only weakly---by
+the chain's own curvature and a realized estimate. So the $(\lambda,\kappa)$ block is the fragile
+part when the readout is poor. Where data is thin, regularise it (a prior on the timescales) rather
+than floating all nine knobs.
 
 %=============================================================================
 \section{Closed-form ATM Taylor coefficients by implicit differentiation}
