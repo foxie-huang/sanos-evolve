@@ -7,9 +7,9 @@ where calibrate_joint had only the last two:
       log-moneyness grid  ->  "fit the kernel to reproduce the T_j->T_{j+1} transition";
   (2) beta_SSR * SSR term-structure (exact beta + term-structure leverage);
   (3) beta_vov * VIX vol-of-vol readout.
-Fitting the SSR alone (calibrate_slv_exact_ts) lets theta drift off the marginal (the de-event bridge's
-variance over-production -- NOT a real "SSR-vs-marginal tension"). Adding (1) forces the kernel to reproduce
-the marginal by construction: the faithful alg:calib, and the correct theta for the de-eventing bridge.
+Fitting the SSR alone (calibrate_slv_exact_ts) lets theta drift off the marginal -- NOT a real
+"SSR-vs-marginal tension". Adding (1) forces the kernel to reproduce the marginal by construction:
+the faithful alg:calib, and the correct theta whenever the marginal must be matched.
 Pooled Jacobian (reuses calibrate_joint's SSR+VoV machinery). Records wall-time.
     OOS_DATE=YYYY-MM-DD python3 calibrate_full.py [test | n_workers] [w_marg] [w_vov]
 """

@@ -184,7 +184,7 @@ State before running (avoids the retro-fit the whole test exists to prevent):
 - **If H₀ holds:** state plainly in the paper that the hedging edge is the minimum-variance-delta
   effect and the forward-looking claim is unsupported at these horizons — and keep the model's
   *other* contributions (arbitrage-free-by-construction, closed-form/deterministic, exact SSR
-  readout, de-eventing) which do not depend on this test.
+  readout) which do not depend on this test.
 
 ---
 

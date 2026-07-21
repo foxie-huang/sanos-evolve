@@ -15,7 +15,7 @@ a finite weighted sum of Black calls.
 - `run_extended.py` — extended demo: multi-step propagation + §11 recompression (§§8, 11)
   and the §7 VIX vol-of-vol layer.
 - `intraday.py` — intraday / 0DTE algorithm suite (§13): calibration loop + SSR hedger +
-  skew/SSR signal + event de-eventing, on a synthetic intraday world.
+  skew/SSR signal, on a synthetic intraday world.
 - `fetch_data.py` — pull real SPX/SPY option chains from Yahoo (`^SPX`) into `../data/`.
 - `check_finnhub.py`, `probe_fmp.py` — probe a data API's option entitlements.
 - `requirements.txt` — numpy, scipy.
@@ -25,7 +25,7 @@ a finite weighted sum of Black calls.
 pip install -r requirements.txt
 python run_poc.py          # single-step Sec. 12 pipeline + Method A/B ablation
 python run_extended.py     # multi-step + recompression (Sec. 8/11) + VIX layer (Sec. 7)
-python intraday.py         # intraday / 0DTE algo suite (Sec. 13): hedger, signal, event
+python intraday.py         # intraday / 0DTE algo suite (Sec. 13): hedger, signal
 ```
 
 ## What it demonstrates (maps to paper §12)
@@ -86,7 +86,6 @@ produces hedge ratios and signals, not orders.**
   bottoms at the realised SSR, and the **SSR-correct delta beats Black/sticky-strike and
   clearly beats sticky-delta** — the central claim.
 - **Skew/SSR signal** — model vs realised intraday SSR → mean-reversion signal.
-- **Event de-eventing** — extract the scheduled-event jump, flag rich/cheap event vol.
 
 Honest findings: the win over *sticky-delta* is large; the win over *Black/sticky-strike*
 is modest and grows with how far the realised SSR sits above 1 (it is high, ~1.6–1.9, in

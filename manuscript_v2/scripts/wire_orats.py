@@ -30,7 +30,7 @@ import ssr_forecast_eval as E
 from empirical_ssr import DT, atm_vol_skew                  # reuse the validated smile ATM/skew
 from orats_loader import load_day
 
-ORATS = "/Users/foxie/Documents/Research/2026/US_equity_data/orats_eod"
+ORATS = os.environ.get("ORATS_EOD_DIR", os.path.expanduser("~/orats_eod"))  # set ORATS_EOD_DIR to your ORATS EOD chain directory
 TENORS_STEPS = [4, 13, 26, 52]                              # 1m/3m/6m/1y in DT=1/52 steps
 TENORS = np.array(TENORS_STEPS) * DT                        # years
 CACHE = os.path.join(HERE, ".orats_cache")

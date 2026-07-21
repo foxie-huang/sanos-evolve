@@ -49,7 +49,7 @@ content-word count matches to within 1 word — no claim, number, or reference a
   contributions made parallel; related work split in two. All refs/cites/equation/table preserved.
 
 ### Pass 2 — full body (§2–§10 + appendices)
-- Worst run-ons split throughout (§4.6 fusion, §6 SSR, §8 de-eventing + hedging, §9 discussion,
+- Worst run-ons split throughout (§4.6 fusion, §6 SSR, §8 hedging, §9 discussion,
   §10 conclusion, Appendix C intro). Math, equations, algorithms, tables, and proofs untouched.
 - **Coinages resolved** (see table below): retired *rung / ladder / Sobolev-ladder* (§5 title now
   "The fitting step: digitals as a price metric"; `\label{sec:rung}` kept for stable cross-refs);
