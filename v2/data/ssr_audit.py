@@ -20,7 +20,7 @@ from real_targets import statics_targets                             # noqa: E40
 DT = 1.0 / 52.0
 NS = [1, 2, 4, 8, 13, 26]; TT = np.array(NS) * DT                     # 1wk 2wk 1m 2m 3m 6m
 LABELS = ["1wk", "2wk", "1m", "2m", "3m", "6m"]
-OUT = "/Users/foxie/Documents/Research/2026/US_equity_data/orats_eod"
+OUT = os.environ.get("ORATS_EOD_DIR", os.path.expanduser("~/orats_eod"))
 
 
 def date_row(path):

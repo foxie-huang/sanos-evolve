@@ -26,7 +26,7 @@ DT = 1.0 / 52.0; NS = [1, 2, 4, 8, 13]; LABELS = ["1wk", "2wk", "1m", "2m", "3m"
 NAMES = ["nu_f", "nu_s", "nu_l", "lam_skew", "lam_f", "lam_s", "kap_f", "kap_s"]
 THETA_TS = np.array([0.696, 0.290, 0.999, -0.462, 0.439, 2.465, 0.903, 2.780])   # 2015 dense+ts+equal-wt fit
 EMP_2015 = np.array([2.027, 1.658, 1.595, 1.538, 1.457])
-OUT = "/Users/foxie/Documents/Research/2026/US_equity_data/orats_eod"
+OUT = os.environ.get("ORATS_EOD_DIR", os.path.expanduser("~/orats_eod"))
 
 if __name__ == "__main__":
     date = sys.argv[1]; yr = date[:4]

@@ -53,7 +53,7 @@ def exact_vec_ts(x, chain, sig_ref, nz=NZ):
 if __name__ == "__main__":
     START = sys.argv[1] if len(sys.argv) > 1 else "dense"
     X0 = X0_MAP[START]
-    OUT = "/Users/foxie/Documents/Research/2026/US_equity_data/orats_eod"
+    OUT = os.environ.get("ORATS_EOD_DIR", os.path.expanduser("~/orats_eod"))
     date = OUT + "/SPX-NDX-RUT-VIX_2015-06-01.json.gz"; yr = "2015"
     chain = sanos_chain(date); sig_ref = ref_vol(chain)
     kw0 = dict(zip(NAMES, X0)); K0 = TwoFactorSV(gbar=solve_gbar(kw0, sig_ref, dt=DT), dt=DT, n_f=5, n_s=3, n_l=5, **kw0)

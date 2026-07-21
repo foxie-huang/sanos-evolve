@@ -22,7 +22,7 @@ from discslv_slv import atm_skew_of                                   # noqa: E4
 from slv_wire import sanos_chain                                      # noqa: E402
 from slv_interp import interp_marginal                                # noqa: E402
 
-OUT = "/Users/foxie/Documents/Research/2026/US_equity_data/orats_eod"
+OUT = os.environ.get("ORATS_EOD_DIR", os.path.expanduser("~/orats_eod"))
 DAYS = np.array([7, 14, 21, 30, 45, 60, 90, 120, 180])               # maturity grid (calendar days)
 FIT = slice(0, 6)                                                     # 1wk..2m for the slope (the calibrated range)
 

@@ -14,7 +14,7 @@ sys.path.insert(0, POC); sys.path.insert(0, HERE)
 from empirical_ssr import empirical_ssr                              # noqa: E402
 
 CACHE = os.path.join(HERE, ".target_cache"); os.makedirs(CACHE, exist_ok=True)
-OUT = "/Users/foxie/Documents/Research/2026/US_equity_data/orats_eod"
+OUT = os.environ.get("ORATS_EOD_DIR", os.path.expanduser("~/orats_eod"))
 
 
 def emp_ssr_cached(year, ns, dt):

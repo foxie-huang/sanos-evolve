@@ -76,7 +76,7 @@ def empirical_ssr(paths, ns=NS, dt=DT, ticker="SPX"):
 
 
 if __name__ == "__main__":
-    OUT = "/Users/foxie/Documents/Research/2026/US_equity_data/orats_eod"
+    OUT = os.environ.get("ORATS_EOD_DIR", os.path.expanduser("~/orats_eod"))
     yr = sys.argv[1] if len(sys.argv) > 1 else "2015"
     paths = sorted(glob.glob(f"{OUT}/SPX-NDX-RUT-VIX_{yr}-*.json.gz"))
     ssr, n = empirical_ssr(paths)

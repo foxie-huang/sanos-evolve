@@ -1,6 +1,7 @@
 """Wall-clock benchmark of the SANOS-Evolve discrete-LSV pipeline (for the speed section)."""
+import os
 import sys, time, subprocess
-POC = "/Users/foxie/Documents/Research/2026/SANOS_Evolve/disc_SLV/poc"
+POC = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, POC)
 import numpy as np
 

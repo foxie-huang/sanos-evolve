@@ -10,7 +10,7 @@ sqrt(V) reconstructed from the SPX strip should track the actual VIX index level
 import gzip, json, glob, os, sys, time
 import numpy as np
 
-OUT = "/Users/foxie/Documents/Research/2026/US_equity_data/orats_eod"
+OUT = os.environ.get("ORATS_EOD_DIR", os.path.expanduser("~/orats_eod"))
 
 
 def expiry(recs, ticker, target):

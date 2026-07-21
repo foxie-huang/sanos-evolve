@@ -22,7 +22,7 @@ from slv_interp import interp_marginal                              # noqa: E402
 import calibrate_slv_exact_ts as C                                  # noqa: E402
 
 DT = 1.0 / 52.0; NAMES = C.NAMES
-OUT = "/Users/foxie/Documents/Research/2026/US_equity_data/orats_eod"
+OUT = os.environ.get("ORATS_EOD_DIR", os.path.expanduser("~/orats_eod"))
 DATE = "2021-06-01"; THETA = [1.114, 0.518, 0.573, -0.861, 0.848, 3.478, 0.764, 2.214]   # NDX 2021 fit
 
 

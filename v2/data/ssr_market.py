@@ -9,7 +9,7 @@ import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from empirical_ssr import empirical_ssr                                      # noqa: E402
 
-OUT = "/Users/foxie/Documents/Research/2026/US_equity_data/orats_eod"
+OUT = os.environ.get("ORATS_EOD_DIR", os.path.expanduser("~/orats_eod"))
 NS = [1, 2, 4, 8, 13, 26, 52]; LAB = ["1wk", "2wk", "1m", "2m", "3m", "6m", "1y"]
 YEARS = sys.argv[1:] or ["2017", "2019", "2021"]
 

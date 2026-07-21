@@ -23,7 +23,7 @@ discslv_slv.propagate = propagate_vec
 from slv_wire import sanos_chain, ref_vol, solve_gbar, leverage_at    # noqa: E402
 from slv_dtscale import rescale_kap, factor_autocorr, WK              # noqa: E402
 
-date = "/Users/foxie/Documents/Research/2026/US_equity_data/orats_eod/SPX-NDX-RUT-VIX_2015-06-01.json.gz"
+date = os.path.join(os.environ.get("ORATS_EOD_DIR", os.path.expanduser("~/orats_eod")), "SPX-NDX-RUT-VIX_2015-06-01.json.gz")
 chain = sanos_chain(date); sig_ref = ref_vol(chain)
 kw = dict(nu_f=0.452, nu_s=0.463, nu_l=0.568, lam_skew=-1.521, lam_f=0.702, lam_s=2.991, kap_f=0.980, kap_s=2.533)
 

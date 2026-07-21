@@ -13,6 +13,12 @@ next-period realised comovement better than a cheap backward-looking realised es
 | `hullwhite.py` | **Faithful industry baseline.** The cross-strike **Hull–White (2017)** minimum-variance delta: builds the constant-delta 1m vol surface from ORATS and estimates ∂E[Δσ]/∂S ≈ (a+bδ+cδ²)/(S√τ) by a trailing pooled regression across strikes. Re-runs the test with it as the baseline. `python3 hullwhite.py 2015 2019 63`. Confirms the `wire_orats.py` result (98.8% correlated with the simple ATM MV delta). |
 | `wire_poc.py` | Fill-in template wiring F^Q to the *full* POC model (`v2/poc/calibrate_2f.kernel` + `discslv_2f.ssr_2f`) — a heavier variant of `wire_orats.py`. Not runnable until the two TODOs are filled. |
 
+## Data (for the real-data runs)
+`wire_orats.py` and `hullwhite.py` read ORATS EOD option chains. Set `ORATS_EOD_DIR` to your local
+ORATS chain directory (files `SPX-NDX-RUT-VIX_YYYY-MM-DD.json.gz`); it defaults to `~/orats_eod`. The
+option data is licensed and **not** redistributed here — bring your own ORATS subscription.
+`run_demo.py` needs no data (synthetic self-test).
+
 ## Run the self-test
 ```sh
 cd scripts && python3 run_demo.py          # prints Tables A/B/C, then PASS/FAIL
