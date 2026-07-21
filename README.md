@@ -51,8 +51,7 @@ figs/                        manuscript figures
 The empirical studies use **proprietary ORATS / CBOE end-of-day option data**, which is **not
 included** here (it is licensed and not redistributable). Point the loaders at your own ORATS EOD store
 by setting the `ORATS_EOD_DIR` environment variable (files `SPX-NDX-RUT-VIX_YYYY-MM-DD.json.gz`); it
-defaults to `~/orats_eod`. Without the data the code is reference-only. Any data-API keys are read from
-environment variables and are never hard-coded.
+defaults to `~/orats_eod`. Without the data the code is reference-only.
 
 ## Build the manuscript
 
