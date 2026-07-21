@@ -33,7 +33,7 @@ from vix_readout import data_vix                                      # noqa: E4
 from target_cache import emp_ssr_cached                               # noqa: E402
 
 torch.set_default_dtype(torch.float32)                                # the fit config: float32 (2.5x on jacrev)
-OUT = "/Users/foxie/Documents/Research/2026/US_equity_data/orats_eod"
+OUT = os.environ.get("ORATS_EOD_DIR", os.path.expanduser("~/orats_eod"))
 DT = C.DT; NS = C.NS; NZ = C.NZ; NAMES = C.NAMES; LO = C.LO; HI = C.HI; WREL = C.WREL; LABELS = C.LABELS
 MIN_DTE = 7
 # Per-param ridge toward the anchor theta -- the fix for the loose-identification railing. WEAK on the

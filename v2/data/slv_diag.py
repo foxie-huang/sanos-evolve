@@ -15,7 +15,7 @@ from slv_interp import interp_marginal                              # noqa: E402
 
 DT = 1.0 / 52.0
 date = sys.argv[1] if len(sys.argv) > 1 else \
-    "/Users/foxie/Documents/Research/2026/US_equity_data/orats_eod/SPX-NDX-RUT-VIX_2015-06-01.json.gz"
+    os.path.join(os.environ.get("ORATS_EOD_DIR", os.path.expanduser("~/orats_eod")), "SPX-NDX-RUT-VIX_2015-06-01.json.gz")
 chain = sanos_chain(date); sig_ref = ref_vol(chain)
 kw = dict(nu_f=0.43, nu_s=0.50, lam_skew=-1.48, lam_f=0.98, lam_s=1.65, kap_f=1.00, kap_s=2.34, nu_l=0.14)
 gbar = solve_gbar(kw, sig_ref)

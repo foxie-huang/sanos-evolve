@@ -27,7 +27,7 @@ DT = 1.0 / 52.0; NS = [1, 2, 4, 8, 13]; LABELS = ["1wk", "2wk", "1m", "2m", "3m"
 NAMES = ["nu_f", "nu_s", "nu_l", "lam_skew", "lam_f", "lam_s", "kap_f", "kap_s"]
 THETA_TS = np.array([0.696, 0.290, 0.999, -0.462, 0.439, 2.465, 0.903, 2.780])   # 2015 fit
 THETA_2019 = np.array([0.786, 0.375, 0.955, -0.275, 0.671, 2.123, 0.834, 2.093]) # 2019 re-fit
-OUT = "/Users/foxie/Documents/Research/2026/US_equity_data/orats_eod"
+OUT = os.environ.get("ORATS_EOD_DIR", os.path.expanduser("~/orats_eod"))
 flat = lambda z: np.ones_like(np.asarray(z, float))
 
 

@@ -32,7 +32,7 @@ from slv_interp import interp_marginal, total_var                  # noqa: E402
 DT = 1.0 / 52.0; NK = 16
 CORRECT = True                                                       # E[nu|z] second-order Gyongy leverage correction
 NAMES = ["nu_f", "nu_s", "nu_l", "lam_skew", "lam_f", "lam_s", "kap_f", "kap_s"]
-OUT = "/Users/foxie/Documents/Research/2026/US_equity_data/orats_eod"
+OUT = os.environ.get("ORATS_EOD_DIR", os.path.expanduser("~/orats_eod"))
 # ridge-fitted per-date theta from the 2015 joint SSR+VIX backtest
 THETA = {
     "2015-06-01": [0.224, 0.410, 1.078, -0.303, 0.625, 2.184, 0.933, 2.781],

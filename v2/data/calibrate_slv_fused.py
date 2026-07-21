@@ -43,7 +43,7 @@ def fused_ssr_vec(x, chain, sig_ref, nk=NK, split=False):
 
 
 if __name__ == "__main__":
-    OUT = "/Users/foxie/Documents/Research/2026/US_equity_data/orats_eod"
+    OUT = os.environ.get("ORATS_EOD_DIR", os.path.expanduser("~/orats_eod"))
     date = sys.argv[1] if len(sys.argv) > 1 else OUT + "/SPX-NDX-RUT-VIX_2015-06-01.json.gz"
     yr = os.path.basename(date).split("_")[-1][:4]
     chain = sanos_chain(date); sig_ref = ref_vol(chain)

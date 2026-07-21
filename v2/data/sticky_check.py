@@ -41,7 +41,7 @@ DT = 1.0 / 52.0
 NS = [1, 4, 8, 13]; LABELS = ["1wk", "1m", "2m", "3m"]
 THETA = dict(nu_f=0.696, nu_s=0.290, nu_l=0.999, lam_skew=-0.462,          # theta_ts (2015 flat ~4% fit)
              lam_f=0.439, lam_s=2.465, kap_f=0.903, kap_s=2.780)
-DATE = "/Users/foxie/Documents/Research/2026/US_equity_data/orats_eod/SPX-NDX-RUT-VIX_2015-06-01.json.gz"
+DATE = os.path.join(os.environ.get("ORATS_EOD_DIR", os.path.expanduser("~/orats_eod")), "SPX-NDX-RUT-VIX_2015-06-01.json.gz")
 
 
 def atm_moments_of(mu, T, half=0.015, npts=9):

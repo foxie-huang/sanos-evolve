@@ -37,7 +37,7 @@ def exact_vec(x, chain, sig_ref, nz=NZ):
 
 
 if __name__ == "__main__":
-    OUT = "/Users/foxie/Documents/Research/2026/US_equity_data/orats_eod"
+    OUT = os.environ.get("ORATS_EOD_DIR", os.path.expanduser("~/orats_eod"))
     date = OUT + "/SPX-NDX-RUT-VIX_2015-06-01.json.gz"; yr = "2015"
     chain = sanos_chain(date); sig_ref = ref_vol(chain)
     emp, nd = empirical_ssr(sorted(__import__("glob").glob(f"{OUT}/SPX-NDX-RUT-VIX_{yr}-*.json.gz")), ns=NS, dt=DT)

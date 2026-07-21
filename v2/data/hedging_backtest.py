@@ -16,7 +16,7 @@ from scipy.stats import norm
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from empirical_ssr import date_row                                   # noqa: E402
 
-OUT = "/Users/foxie/Documents/Research/2026/US_equity_data/orats_eod"
+OUT = os.environ.get("ORATS_EOD_DIR", os.path.expanduser("~/orats_eod"))
 DT = 1.0 / 52.0
 R_MODEL = 1.6                                                        # calibrated model 1m SSR (structural, OOS)
 

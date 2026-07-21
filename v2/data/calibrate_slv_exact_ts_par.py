@@ -23,7 +23,7 @@ from slv_wire import sanos_chain, ref_vol, solve_gbar, leverage_at    # noqa: E4
 from discslv_2f import TwoFactorSV                              # noqa: E402
 from discslv_slv import Epi_V                                   # noqa: E402
 
-OUT = "/Users/foxie/Documents/Research/2026/US_equity_data/orats_eod"
+OUT = os.environ.get("ORATS_EOD_DIR", os.path.expanduser("~/orats_eod"))
 OOS_DATE = os.environ.get("OOS_DATE", "2015-06-01")                # override date (statics + year target) for OOS
 DATE = OUT + f"/SPX-NDX-RUT-VIX_{OOS_DATE}.json.gz"; YR = OOS_DATE[:4]
 _CTX = {}

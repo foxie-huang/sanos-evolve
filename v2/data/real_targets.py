@@ -51,7 +51,7 @@ def statics_targets(path, ticker="SPX", ns=NS, dt=DT):
 
 
 if __name__ == "__main__":
-    OUT = "/Users/foxie/Documents/Research/2026/US_equity_data/orats_eod"
+    OUT = os.environ.get("ORATS_EOD_DIR", os.path.expanduser("~/orats_eod"))
     path = sys.argv[1] if len(sys.argv) > 1 else OUT + "/SPX-NDX-RUT-VIX_2015-06-01.json.gz"
     t = statics_targets(path)
     print(f"{os.path.basename(path)}  real statics targets (interp to 1m/3m/6m/1y):")

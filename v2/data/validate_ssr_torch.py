@@ -17,7 +17,7 @@ from slv_wire import sanos_chain, ref_vol, solve_gbar, leverage_at
 
 DT = 1.0 / 52.0
 kw = dict(nu_f=0.208, nu_s=0.411, nu_l=1.070, lam_skew=-0.303, lam_f=0.633, lam_s=2.092, kap_f=0.937, kap_s=2.706)
-OUT = "/Users/foxie/Documents/Research/2026/US_equity_data/orats_eod"
+OUT = os.environ.get("ORATS_EOD_DIR", os.path.expanduser("~/orats_eod"))
 chain = sanos_chain(OUT + "/SPX-NDX-RUT-VIX_2015-06-01.json.gz"); sig = ref_vol(chain)
 gbar = solve_gbar(kw, sig, dt=DT)
 K = TwoFactorSV(gbar=gbar, dt=DT, n_f=5, n_s=3, n_l=5, **kw); EV = Epi_V(K); nub = nu_bar(K, EV); Vlr, tiltr = raw_increment(K)

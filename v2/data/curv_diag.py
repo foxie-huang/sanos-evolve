@@ -21,7 +21,7 @@ from slv_interp import interp_marginal                              # noqa: E402
 import calibrate_slv_exact_ts as C                                  # noqa: E402
 
 DT = 1.0 / 52.0; NAMES = C.NAMES
-OUT = "/Users/foxie/Documents/Research/2026/US_equity_data/orats_eod"
+OUT = os.environ.get("ORATS_EOD_DIR", os.path.expanduser("~/orats_eod"))
 # (date, ticker, fitted theta)
 CASES = [
     ("2019-06-03", "SPX", [0.832, 0.362, 0.874, -0.302, 0.490, 2.426, 0.738, 2.834]),  # SPX reference

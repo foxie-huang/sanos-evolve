@@ -22,7 +22,7 @@ DT = 1.0 / 52.0
 NAMES = ["nu_f", "nu_s", "nu_l", "lam_skew", "lam_f", "lam_s", "kap_f", "kap_s"]
 THETA_TS = np.array([0.696, 0.290, 0.999, -0.462, 0.439, 2.465, 0.903, 2.780])
 INU_F, INU_S = 0, 1                                                 # the two vol-of-vol AMPLITUDES (fast, slow)
-OUT = "/Users/foxie/Documents/Research/2026/US_equity_data/orats_eod"
+OUT = os.environ.get("ORATS_EOD_DIR", os.path.expanduser("~/orats_eod"))
 
 
 def vov_curve(x, dtes, sig_ref, spot, base=THETA_TS):
