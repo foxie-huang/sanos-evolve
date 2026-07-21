@@ -31,7 +31,7 @@ import ssr_forecast_eval as E
 from orats_loader import load_day
 from empirical_ssr import atm_vol_skew, DT
 
-ORATS = "/Users/foxie/Documents/Research/2026/US_equity_data/orats_eod"
+ORATS = os.environ.get("ORATS_EOD_DIR", os.path.expanduser("~/orats_eod"))  # set ORATS_EOD_DIR to your ORATS EOD chain directory
 TENORS = np.array([4, 13, 26, 52]) * DT                     # 1m/3m/6m/1y (years)
 DELTAS = np.arange(0.1, 0.91, 0.1)                          # call-equivalent delta buckets
 CACHE = os.path.join(HERE, ".orats_cache")
