@@ -229,6 +229,6 @@ State before running (avoids the retro-fit the whole test exists to prevent):
   statistics behave — the encompassing test picks the informative forecaster, the null variant
   correctly fails to reject — and (b) show the exact output shape the paper tables will take. **No
   real-data numbers are produced or implied here.**
-- Wiring: replace the two forecaster hooks with calls into `v2/poc/calibrate_2f.py` +
-  `discslv_2f` (model) and `v2/poc/realized_ssr.py` (realised); point `load_panel` at the ORATS
+- Wiring: replace the two forecaster hooks with calls into `poc/calibrate_2f.py` +
+  `discslv_2f` (model) and `poc/realized_ssr.py` (realised); point `load_panel` at the ORATS
   cache. See the interface notes at the top of `ssr_forecast_eval.py`.

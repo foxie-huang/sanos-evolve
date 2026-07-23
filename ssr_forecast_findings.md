@@ -12,7 +12,7 @@ Baseline = the **minimum-variance / Hull–White (2017) delta** (not Black). F^Q
 
 **ORATS `stockPrice` is corrupt in 2022–2023.** It varies across strikes within a day, with bad prints
 up to +20% (e.g. 2023-03-06 ranges 4050→4685 for a spot really ~4050; the clean **parity-forward F**
-that day is 4050.7). The standard pipeline (`v2/data/empirical_ssr.date_row` → `orats_loader`) picks one
+that day is 4050.7). The standard pipeline (`data/empirical_ssr.date_row` → `orats_loader`) picks one
 row's `stockPrice`, so on those days it grabs a bad value → spurious ±20% one-day return spikes.
 
 Consequences of the bad spot (returns only — the mid-IV smile, hence ATM vol/skew, is clean):

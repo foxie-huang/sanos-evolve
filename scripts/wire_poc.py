@@ -3,7 +3,7 @@ TEMPLATE: wire the SSR-forecast harness to the real POC engine + ORATS data.
 ============================================================================
 
 This is a fill-in template, NOT a runnable script. It shows the exact calls into
-`v2/poc/` (signatures verified) so a real out-of-sample run is a matter of supplying the
+`poc/` (signatures verified) so a real out-of-sample run is a matter of supplying the
 ORATS panel and the per-date calibration. Nothing here fabricates results.
 
 Fill in the two TODO blocks (`load_orats_panel`, and the calibration inside
@@ -22,8 +22,8 @@ from __future__ import annotations
 import os, sys
 import numpy as np
 
-# make v2/poc importable ---------------------------------------------------------------
-_POC = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "v2", "poc"))
+# make poc importable ---------------------------------------------------------------
+_POC = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "poc"))
 sys.path.insert(0, _POC)
 
 from ssr_forecast_eval import (Panel, RealisedSSRForecaster, persistence_forecaster,
@@ -48,7 +48,7 @@ def load_orats_panel(tenors=(1/52, 1/12, 1/4)) -> Panel:
     """
     raise NotImplementedError(
         "Wire to ORATS: for each date build CMV ATM vol + ATM skew per tenor, and stash the "
-        "t-cross-section in xsec[date]. See v2/poc/data_port.load_chain and fetch_data.py schema."
+        "t-cross-section in xsec[date]. See poc/data_port.load_chain and fetch_data.py schema."
     )
 
 

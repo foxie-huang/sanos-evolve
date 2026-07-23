@@ -14,7 +14,7 @@ This module is a PURE, data-source-agnostic statistics + replay engine. Real inp
 through three hooks; NOTHING here fabricates real-data numbers.
 
 ------------------------------------------------------------------------------------------
-WIRING (exact POC signatures, from v2/poc/) -- replace the two forecaster hooks:
+WIRING (exact POC signatures, from poc/) -- replace the two forecaster hooks:
 
   ModelSSRForecaster  (forward-looking, Q):
       per test date t, calibrate SANOS-Evolve to the t cross-section and read SSR^Q_t.
@@ -30,7 +30,7 @@ WIRING (exact POC signatures, from v2/poc/) -- replace the two forecaster hooks:
       trailing OLS slope of dATM-IV on log-return over [t-w, t], optionally / skew -> SSR units.
 
   load_panel: build a Panel from the ORATS cache (memory: ORATS EOD SPX+VIX 2010-2026),
-      or v2/poc/fetch_data.py CSVs (columns: expiration,type,dte,strike,bid,ask,impliedVolatility).
+      or poc/fetch_data.py CSVs (columns: expiration,type,dte,strike,bid,ask,impliedVolatility).
 
 Units: keep TARGET and FORECAST in the same units. Two consistent choices:
    (a) SSR units:  target = beta_real / skew_obs ,  model = ssr_2f(...)[0]      [default]

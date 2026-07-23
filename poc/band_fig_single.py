@@ -2,7 +2,7 @@
 band_fig_single.py -- regenerate figs/synthetic_main.png as the SINGLE decoupling-band panel
 (paper fig:synth after the surgical cut: the fit demo panels 1-3 are dropped; the band survives).
 Same computation as final_band_fig.py (steepest static-preserving direction, Newton-held walk),
-plus: persist the band arrays + wall time to band_results.json. Run from v2/poc/ (~5-6 min).
+plus: persist the band arrays + wall time to band_results.json. Run from poc/ (~5-6 min).
 """
 import io, json, time, warnings
 import numpy as np

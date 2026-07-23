@@ -2,7 +2,7 @@
 REAL-DATA run of the SSR-forecast test on ORATS SPX EOD.
 ========================================================
 
-Builds the daily Panel from the existing pipeline (v2/data/empirical_ssr.date_row) and runs the
+Builds the daily Panel from the existing pipeline (data/empirical_ssr.date_row) and runs the
 harness (ssr_forecast_eval) for real.
 
 The option-implied forecast F^Q here is the DOEFF-KAMAL skew-decay SSR (= H + 3/2, with H read
@@ -23,7 +23,7 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-_V2DATA = os.path.abspath(os.path.join(HERE, "..", "..", "v2", "data"))
+_V2DATA = os.path.abspath(os.path.join(HERE, "..", "data"))
 sys.path.insert(0, _V2DATA)
 
 import ssr_forecast_eval as E

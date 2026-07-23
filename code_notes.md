@@ -4,7 +4,7 @@ Discrete **stochastic-local-volatility** for SPX: SANOS arbitrage-free Gaussian-
 a two-timescale GM martingale **kernel (dynamics)**, fused by discrete Dupire  `σ_LV² = σ²_Dupire / E[ν|z]`.
 Paper = `../disc_SLV.tex` (calibration objective `eq:objective` §850, algorithm `alg:calib` §901).
 
-- **Code:** `v2/data/` = working scripts (ORATS-integrated) · `v2/poc/` = model core + synthetic PoC.
+- **Code:** `data/` = working scripts (ORATS-integrated) · `poc/` = model core + synthetic PoC.
 - **Data:** `$ORATS_EOD_DIR/SPX-NDX-RUT-VIX_YYYY-MM-DD.json.gz`
   — EOD full chains, SPX/NDX/RUT/VIX bundled, 2010–2026. **SPX expiries: daily since ~mid-2022; M/W/F 2016–2022; Fridays earlier.**
 - **Conventions that bite:**

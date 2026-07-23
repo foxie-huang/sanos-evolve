@@ -2,7 +2,7 @@
 band_fig_single5.py -- regenerate figs/synthetic_main.png as the SINGLE decoupling-band panel,
 5-observable hold (vol@1m,6m,1y + skew@1m + curvature@1m) -- the honest 'fixed statics' band that
 produced the paper's [0.93,1.02]/0.08 (residual_band.py method, NK=20). Persists
-band_results_5obs.json with achieved hold errors + wall time. Run from v2/poc/ (~8-10 min).
+band_results_5obs.json with achieved hold errors + wall time. Run from poc/ (~8-10 min).
 """
 import json, time, warnings
 import numpy as np

@@ -26,7 +26,7 @@ from scipy.stats import norm
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..", "..", "v2", "data")))
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..", "data")))
 import ssr_forecast_eval as E
 from orats_loader import load_day
 from empirical_ssr import atm_vol_skew, DT
