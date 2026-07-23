@@ -34,7 +34,6 @@ data/                   calibration + empirical — calibrate_joint_torch.py (tw
                         hedging_backtest.py (SSR-consistent hedging replay), vix_*.py diagnostics
 poc/                    core model engine (SANOS LP, discrete-SLV kernel, VIX readout)
 figs/                   manuscript figures
-figs_v2/                additional generated figures
 ```
 
 ## Data
