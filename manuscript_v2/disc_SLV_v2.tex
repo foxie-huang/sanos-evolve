@@ -60,12 +60,14 @@ Model for European-Option Smile Dynamics\thanks{Working paper. Comments welcome.
 \maketitle
 
 \begin{abstract}
-An arbitrage-free set of option marginals fixes an underlying's local-volatility content, but not
-how its smile moves when the spot moves. Existing models are either parametric in the smile
-(stochastic volatility) or exact but expensive to calibrate (stochastic-local volatility).
-SANOS-Evolve keeps the two separate: a static SANOS linear program fixes strictly arbitrage-free
-marginals, and a dynamic layer fits a martingale two-timescale kernel between them, calibrated
-while the marginals stay fixed and arbitrage-free by construction (Strassen). Every object is a
+How an equity-index smile \emph{moves} when the spot moves---its skew-stickiness---governs every
+forward-starting and path-dependent hedge, yet is left rigidly determined by the models that
+reprice today's smile exactly (local and stochastic-local volatility), or only approximated by
+those that move it freely but miss the smile (stochastic volatility). SANOS-Evolve makes that
+motion a free, directly calibrated target while keeping the smile itself exact and arbitrage-free,
+in closed form: a static SANOS linear program fixes strictly arbitrage-free marginals, and a
+martingale two-timescale kernel is fitted between them, calibrated while the marginals stay fixed
+by a discrete Gy\"ongy overlay and arbitrage-free by construction (Strassen). Every object is a
 Gaussian mixture, so prices, Greeks, and the variance-index smile are closed-form. Translation
 invariance makes the skew-stickiness ratio an exact closed-form realised covariance whose term
 structure the two timescales fit, and identifies the vol-of-vol from a forward-variance
@@ -139,6 +141,22 @@ parametric (stochastic volatility), and exact and dynamic but intractable (SLV).
 that is at once tractable (closed-form), data-driven (fits any arbitrage-free smile exactly), and
 dynamically controllable (the SSR a free target). SANOS-Evolve is that kernel.
 
+\paragraph{Martingales between discrete marginals.} SANOS-Evolve is not alone in building the
+transition directly between finitely many arbitrage-free marginals---but it is alone in what it
+asks of that transition. Andreasen--Huge~\cite{andreasenhuge2011} interpolate the \emph{surface}
+by a one-step implicit finite difference of Dupire's equation, and mixture-preserving
+schemes~\cite{vandenbergmix2026} interpolate across expiries within a fixed component
+family---both discrete \emph{local}-volatility constructions, static by design. The Bass
+local-volatility model~\cite{conzehl2021,backhoff2020,qin2024bass} goes further, constructing the
+martingale between the marginals that is \emph{closest to Brownian motion}; Markov-functional
+models~\cite{huntkennedypelsser2000} map a low-dimensional driver through a calibrated functional
+to the same marginals. Both fix the marginals \emph{and thereby pin the dynamics}: the spot--vol
+response is a by-product, not a control, so the SSR is not free---the local-vol rigidity we set
+out to escape returns. SANOS-Evolve shares their exact-marginal, discrete-time martingale
+skeleton but inverts the selection principle: the Gy\"ongy leverage overlay
+(Section~\ref{sec:fusion}) carries the marginals for free, so the two-timescale kernel spends its
+freedom fitting the SSR term structure as an explicit target. Same skeleton, opposite objective.
+
 \paragraph{SANOS-Evolve: marginals plus a fitted kernel.}
 SANOS supplies arbitrage-free marginals $\{\mu_j\}$, but pairs them with a rigid canonical transition
 operator; its authors leave controllable discrete-time dynamics as an open
@@ -152,6 +170,11 @@ volatility regime with two mean-reversion timescales:
 \;=\;
 \underbrace{\text{closed-form discrete SLV}}_{\text{for any European option.}}
 \]
+
+By \emph{discrete} we mean the time-stepping---an explicit one-step martingale kernel between the
+listed maturities' marginals, not a time-discretisation of a continuous SLV diffusion and not a
+discrete \emph{local}-volatility interpolation of the static surface.
+
 We fix the marginals from quotes and fit the kernel between them, rather than postulate a process and
 back out a fit. The SANOS no-arbitrage structure is therefore preserved exactly while the dynamics are
 calibrated. Two properties make this work.
@@ -209,7 +232,7 @@ marginal fit (fill).
 (horizontal), smile-and-dynamics freedom (vertical), exactness of the marginal fit (fill); tiers and
 legend on the plot (Black--Scholes: no smile, fit n/a, grey). In the rightmost column, SANOS-Evolve
 replaces SANOS's rigid canonical coupling with a free-dynamics Gaussian-mixture kernel
-(Appendix~\ref{app:density}). A black cross marks joint SPX--VIX calibration (both smiles as hard
+(Appendix~\ref{app:density}). Here \emph{free} means the dynamics are decoupled from the exactly-matched marginals and dense in the translation-invariant class (Prop.~\ref{prop:dyn-dense}); the calibration exercises the first two orders---the SSR and the vol-of-vol---with the vol-of-vol skew and roughness as in-class extensions. A black cross marks joint SPX--VIX calibration (both smiles as hard
 targets)---the programme the VIX-as-readout lane of Section~\ref{sec:intro} stays out of.
 \emph{Abbreviations:} MOT/OT, (martingale) optimal transport; LSV,
 stochastic-local volatility; LVG, local variance gamma; BM, Brigo--Mercurio; LV, local volatility;
@@ -2355,6 +2378,29 @@ transport. \textit{arXiv preprint} arXiv:2603.10857.
 \bibitem{hullwhite2017}
 Hull, J., White, A. (2017). Optimal delta hedging for options.
 \textit{Journal of Banking and Finance}, 82, 180--190.
+
+\bibitem{andreasenhuge2011}
+Andreasen, J., Huge, B. (2011). Volatility interpolation. \textit{Risk}, 24(3), 76--79.
+
+\bibitem{conzehl2021}
+Conze, A., Henry-Labord\`ere, P. (2021). Bass construction with multi-marginals: Lightspeed
+computation in a new local volatility model. \textit{SSRN preprint} 3853085.
+
+\bibitem{backhoff2020}
+Backhoff-Veraguas, J., Beiglb\"ock, M., Huesmann, M., K\"allblad, S. (2020). Martingale
+Benamou--Brenier: a probabilistic perspective. \textit{Annals of Probability}, 48(5), 2258--2289.
+
+\bibitem{qin2024bass}
+Qin, H., Che, C., Yang, R., Feng, L. (2024). Robust and fast Bass local volatility.
+\textit{arXiv preprint} arXiv:2411.04321.
+
+\bibitem{huntkennedypelsser2000}
+Hunt, P., Kennedy, J., Pelsser, A. (2000). Markov-functional interest rate models.
+\textit{Finance and Stochastics}, 4(4), 391--408.
+
+\bibitem{vandenbergmix2026}
+van den Berg, T. (2026). Mixture-preserving, arbitrage-free interpolation for volatility-surface
+models. \textit{arXiv preprint} arXiv:2606.12717.
 
 \end{thebibliography}
 
