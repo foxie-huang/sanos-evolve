@@ -42,23 +42,19 @@ def model_vix_ivol(K, sig_ref, tau_opt, spot=None):
       4. Atomic VIX law VIX=sqrt(Y) w.p. p; ATM option E_p[(VIX-F)^+]; invert Black over tau_opt."""
     from discslv_slv import Epi_V, nu_bar
     EV = Epi_V(K); v = (sig_ref ** 2) * nu_bar(K, EV)               # (n_f,n_s) forward-variance rate per regime
-    Pf = np.einsum("l,lij->ij", K.wl, K.Tf)                          # l-averaged factor transitions P(f'|f)
-    Ps = np.einsum("l,lij->ij", K.wl, K.Ts)                          #                              P(s'|s)
+    # EXACT joint regime transition on the product state (f,s), index f*n_s+s. The branch l is COMMON
+    # to both factors, so the joint does NOT factorise into the branch-averaged marginals.
+    Pj = sum(K.wl[l] * np.kron(K.Tf[l], K.Ts[l]) for l in range(K.n_l))
     n_var = max(1, int(round(TAU_VAR / K.dt)))                       # steps in the 30d variance window
-    Pfm = np.eye(K.n_f); Psm = np.eye(K.n_s); Y = np.zeros_like(v)
+    vv = v.reshape(-1); Y = np.zeros_like(vv); Pm = np.eye(K.n_f * K.n_s)
     for _ in range(n_var):                                           # exact m-step-ahead expected variance, m=1..n_var
-        Pfm = Pfm @ Pf; Psm = Psm @ Ps
-        Y += Pfm @ v @ Psm.T
-    Y /= n_var
+        Pm = Pm @ Pj; Y = Y + Pm @ vv
+    Y = (Y / n_var).reshape(v.shape)
     vix = np.sqrt(Y)                                                 # atomic VIX per regime
     n_opt = max(1, int(round(tau_opt / K.dt)))                       # steps to option expiry
     fc = K.n_f // 2                                                  # fast factor reverts fast -> start central
     s0 = K.n_s // 2 if spot is None else int(np.argmin(np.abs(vix[fc, :] - spot)))   # slow regime = today's vol state
-    ef = np.zeros(K.n_f); ef[fc] = 1.0
-    es = np.zeros(K.n_s); es[s0] = 1.0
-    pf = ef @ np.linalg.matrix_power(Pf, n_opt)                      # terminal factor laws (widen with expiry)
-    ps = es @ np.linalg.matrix_power(Ps, n_opt)
-    p = np.outer(pf, ps)                                             # terminal regime law at expiry
+    p = np.linalg.matrix_power(Pj, n_opt)[fc * K.n_s + s0].reshape(v.shape)          # terminal regime law (joint)
     F = float(np.sum(p * vix))                                       # VIX forward = E_p[VIX]
     Catm = float(np.sum(p * np.maximum(vix - F, 0.0)))              # ATM VIX call (undiscounted, on the forward)
     iv = brentq(lambda s: F * (2 * norm.cdf(s * np.sqrt(tau_opt) / 2) - 1) - Catm, 1e-4, 8.0)
