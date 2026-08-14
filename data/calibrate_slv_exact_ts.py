@@ -37,6 +37,88 @@ X0_MAP = {                                                                 # mul
     "low":   np.array([0.280, 0.293, 0.465, -2.113, 1.164, 2.460, 0.992, 2.518]),   # low-nu/high-skew (sparse fit, fit 1wk +2%)
     "ts":    np.array([0.696, 0.290, 0.999, -0.462, 0.439, 2.465, 0.903, 2.780]),   # 2015 dense+ts+equal-wt fit (well-behaved OOS start)
 }
+# ======================================================================================
+# NORMALISED PARAMETERISATION (SANOS_REFERENCE.md 16.9). Added alongside; the vectors above
+# still drive the old abscissa-indexed kernel.
+#
+#     u' = kap u + sqrt(1-kap^2) ( rho z_l + sqrt(1-rho^2) eps )      Var(u) = 1 by construction
+#
+# lam_f/lam_s (unbounded loadings, LO/HI 0..8) become BOUNDED correlations rho_f/rho_s, and kappa
+# is now exactly the autocorrelation instead of a number the old chain realised only 0.9-95% of.
+#
+# kap_s is NOT FITTED. It is fixed at Bergomi's k2 ~ 0.23/yr. The reason is IDENTIFICATION, not
+# representation: 16.9's kernel represents kappa_s = 0.9956 exactly and at the same cost as 0.5,
+# so the 16.8 argument ("a chain cannot represent kappa >= 0.99") no longer applies. What does
+# apply is 16.0's measurement -- a two-factor decay fit to the 9-12 vov targets is DEGENERATE in
+# all nine years, because a 37-week window has no leverage on a ~150-week timescale. Left free,
+# kap_s absorbs other misfits; that is how it reached > 1 in 8/9 years, which has no stationary
+# limit at all. Fixing it also frees nu_s, which ranged 0.10-0.60 with no stable value while the
+# two were entangled.
+KAP_S_FIXED = 0.9956                      # Bergomi k2 ~ 0.23/yr, ~157wk
+KAP_S_BRACKET = (0.98, 0.999)             # 16.0's robustness bracket: 2x in surviving weight at 260d
+
+NAMES_N = ["nu_f", "nu_s", "nu_l", "lam_skew", "rho_f", "rho_s", "kap_f"]     # 7 fitted, not 8
+LO_N = np.array([0.05, 0.05, 0.10, -3.0, 0.00, 0.00, 0.05])
+HI_N = np.array([3.00, 3.00, 1.50,  0.0, 0.99, 0.99, 0.995])
+#   nu_*  HI 1.2 -> 3.0: nu now multiplies a UNIT-variance factor, so it absorbs the sqrt(Var)
+#         the old truncated chain silently swallowed. Remapped seeds sit at 0.46-1.38.
+#   rho_* LO 0 preserves the old lam_* >= 0 constraint exactly (rho = lam/sqrt(1+lam^2) is monotone).
+#   kap_f HI 1.0 -> 0.995: |kap| >= 1 has NO stationary law, and `s_f = sqrt(clamp(1-kap^2,1e-12))`
+#         would silently produce a diverging factor rather than erroring. kap_f RAILED at the old
+#         1.0 in 4/9 years, which 16.0 attributes to the truncation -- so whether it still rails
+#         under the fixed kernel is a real test, not a nuisance.
+
+# Seeds remapped from X0_MAP by MATCHING WHAT THE OLD CHAIN REALISED, not its nominal parameters.
+# This matters: the old seeds were fitted AGAINST the truncated chain, so a formula-faithful remap
+# (rho = lam/sqrt(1+lam^2), nu' = nu sqrt((1+lam^2)/(1-kap^2))) propagates the compensation --
+# "low" would map to nu_f = 3.40 for a chain that only ever delivered ~0.56. So instead:
+#     kap_f  <- the REALISED ac of the old n_f=5 chain      (e.g. ts: nominal 0.903 -> 0.834)
+#     nu_f   <- nu_f_old * the REALISED sd                  (e.g. ts: 0.696 * 1.82 = 1.269)
+#     rho_f  <- realised corr(z', z_l) / sqrt(1 - kap_f^2)
+# kap_s has no stationary image at all (2.5-3.0 in every seed), so nu_s uses the realised slow sd
+# and kap_s takes KAP_S_FIXED. Generating script: vix_joint_refit/remap_seeds.py
+X0_MAP_N = {
+    "dense": np.array([1.3847, 0.8176, 0.8310, -0.6520, 0.4270, 0.9019, 0.7372]),
+    "low":   np.array([0.5855, 0.4618, 0.4650, -2.1130, 0.6752, 0.9264, 0.8113]),
+    "ts":    np.array([1.2689, 0.4572, 0.9990, -0.4620, 0.3743, 0.9267, 0.8341]),
+}
+
+
+def theta9_n(x7, gbar, kap_s=None):
+    """7 fitted params + solved gbar + the FIXED kap_s -> the 9-vector build_kernel_n consumes."""
+    x7 = np.asarray(x7, float)
+    return np.concatenate([[gbar], x7[:6], [x7[6]], [KAP_S_FIXED if kap_s is None else kap_s]])
+
+
+# ---------------------------------------------------------------- 8-parameter variant: kap_s FITTED
+# NAMES_N/LO_N/HI_N/X0_MAP_N are LEFT AT 7 ON PURPOSE. Eleven scripts zip NAMES_N against theta dicts
+# in already-written fit JSONs, all of which have 7 keys -- widening the shared constant would raise
+# KeyError on every recorded panel (ndx_panel_record, panel_reb_record, fit_norm_*_ct, every plot).
+# The 8-param path is opt-in and additive; `_th9_n` and `fit_date` dispatch on len(theta).
+#
+# WHY FIT IT. kap_s was pinned at 0.9956 (157wk) on the grounds that a ~37-week window cannot
+# identify a ~150-week timescale -- but that argues against HAVING a 157-week factor, not for pinning
+# one there. Measured: a 5-rung ladder (0.90/0.95/0.98/0.99/0.9956) on SPX has an interior cost
+# minimum at 0.98 (34wk), improving 8 of 9 years, mean 1.85x, so the direction is NOT degenerate with
+# nu_s. And kap_s carries ~25x the vov-shape leverage of any other parameter (7.7% vs 0.3% per 2%
+# perturbation) while being the only one held fixed.
+NAMES_N8 = NAMES_N + ["kap_s"]
+# LO 0.50 = 1.0wk half-life, HI 0.998 = 346wk.
+# HI MUST BRACKET THE INCUMBENT: KAP_S_FIXED = 0.9956 is Bergomi's k2 ~ 0.23/yr (~157wk), so a bound
+# below it would forbid the fit from returning to the literature anchor and bias the test against the
+# value we are testing. 0.998 clears it with room. HI must still stay < 1: |kap| >= 1 has no
+# stationary distribution (the old kap_s range [0.5, 4.0] is illegal here -- it was a softmax
+# coefficient, not an autocorrelation).
+# LO 0.50 spans v2's fitted slow half-lives (0.7-45wk) and fully overlaps the fitted kap_f range
+# (0.40-0.92), so the two factors CAN swap roles -- the model is symmetric under
+# (nu_f,rho_f,kap_f) <-> (nu_s,rho_s,kap_s). Harmless for the fit (identical mixture), but theta must
+# be read with the factors SORTED before comparing across years.
+LO_N8 = np.concatenate([LO_N, [0.50]])
+HI_N8 = np.concatenate([HI_N, [0.998]])
+# seeds start at the ladder optimum, not at the old pin
+X0_MAP_N8 = {k: list(v) + [0.98] for k, v in X0_MAP_N.items()}
+
+
 _CACHE = {}
 
 

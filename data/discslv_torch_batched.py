@@ -6,33 +6,64 @@ batch dimension, instead of the Python loop. The recompress becomes a BATCHED de
 lev_increment/interp_batch from discslv_torch. Same result as the loop version; far fewer ops -> fast +
 still differentiable.  Validate+bench:  python3 discslv_torch_batched.py
 """
+import os
+
 import numpy as np
 import torch
 from numpy.polynomial.hermite_e import hermegauss
 import discslv_torch as T
+
+_JENSEN = os.environ.get("JENSEN", "1") != "0"   # intra-component leverage correction, on by default
 
 torch.set_default_dtype(torch.float64)
 
 
 def _merge_batch(w, mu, sg, nk):
     """(B,M)->(B,nk) batched recompress: v1's sort->equal-weight chunk (STOP-GRADIENT membership) ->
-    moment-match (differentiable). Matches _fast_merge per row."""
+    moment-match (differentiable). Matches _fast_merge per row. Aggregation via scatter_add instead of a
+    dense (Bn,M,nk) one-hot einsum -- identical result + identical gradient (membership is stop-grad, the
+    sums are diff'able in w/mu/sg), ~nk-fold less memory (the one-hot was the eval's dominant tensor)."""
     Bn, M = w.shape
     with torch.no_grad():
         order = torch.argsort(mu, dim=1)
         cw = torch.cumsum(torch.gather(w, 1, order), dim=1)
         qt = cw[:, -1:] * (torch.arange(1, nk, dtype=w.dtype) / nk)[None, :]   # (B, nk-1)
         edges = torch.searchsorted(cw, qt, right=True)                         # (B, nk-1)
-        pos = torch.arange(M)[None, :]
-        chunk = (pos[:, :, None] >= edges[:, None, :]).sum(-1)                 # (B, M) chunk id per sorted pos
-        memb = torch.zeros(Bn, M, nk)
-        bidx = torch.arange(Bn)[:, None].expand(Bn, M)
-        memb[bidx, order, chunk] = 1.0
-    Wj = torch.einsum("bm,bmk->bk", w, memb)
+        pos = torch.arange(M)[None, :].expand(Bn, M).contiguous()
+        chunk = torch.searchsorted(edges, pos, right=True)                    # (B,M) chunk id per SORTED pos:
+        #   count edges<=pos == the old (pos[:,:,None]>=edges[:,None,:]).sum(-1), but WITHOUT the (Bn,M,nk)
+        #   int64 broadcast that was the eval's true ~12GB transient peak (searchsorted is exact, verified 0 mismatch)
+        chunk_of = torch.empty(Bn, M, dtype=torch.long).scatter_(1, order, chunk)  # chunk id per ORIGINAL pos
+
+    def seg(x):                                                                # segment-sum into nk bins (diff'able in x)
+        return torch.zeros(Bn, nk, dtype=x.dtype, device=x.device).scatter_add(1, chunk_of, x)
+    Wj = seg(w)
     Ws = torch.where(Wj > 1e-15, Wj, torch.ones_like(Wj))
-    Mj = torch.where(Wj > 1e-15, torch.einsum("bm,bmk->bk", w * mu, memb) / Ws, torch.zeros_like(Wj))
-    E2 = torch.einsum("bm,bmk->bk", w * (sg ** 2 + mu ** 2), memb) / Ws
+    Mj = torch.where(Wj > 1e-15, seg(w * mu) / Ws, torch.zeros_like(Wj))
+    E2 = seg(w * (sg ** 2 + mu ** 2)) / Ws
     return Wj, Mj, torch.sqrt(torch.clamp(E2 - Mj ** 2, min=1e-12))
+
+
+def _clamped_ratio(a, mu, sg, m):
+    """E[exp(a*clamp(z,-m,m))] / exp(a*clamp(mu,-m,m)) for z ~ N(mu, sg^2). Exact.
+
+    The naive lognormal identity exp(a^2 sg^2/2) is WRONG here and unstable: lev_torch clamps its
+    argument to +-zmax, so lambda is flat outside that band, and a component wider than the band (sd
+    0.245 against zmax 0.066 by step 2) got its variance inflated 64x, which widened the next
+    component, which inflated more -- divergence to NaN by step 4. Splitting the expectation at the
+    clamp gives the exact value and bounds it by exp(2|a|m), since clamp(z) never leaves [-m, m], so
+    the feedback cannot run away.
+    """
+    Phi = lambda x: 0.5 * (1.0 + torch.erf(x * 0.70710678118654752))
+    sg = torch.clamp(sg, min=1e-12)
+    cmu = torch.clamp(mu, -m, m)
+    lo, hi = (-m - mu) / sg, (m - mu) / sg
+    t_lo = torch.exp(a * (-m - cmu)) * Phi(lo)                                  # mass below -m
+    t_hi = torch.exp(a * (m - cmu)) * (1.0 - Phi(hi))                           # mass above +m
+    ex = torch.clamp(a * (mu - cmu) + 0.5 * a * a * sg * sg, max=40.0)          # guard the interior
+    t_mid = torch.exp(ex) * (Phi(hi - a * sg) - Phi(lo - a * sg))
+    b = float(np.exp(2.0 * abs(a) * m))
+    return torch.clamp(t_lo + t_mid + t_hi, 1.0 / b, b)
 
 
 def propagate_batch(state, ker, lam, nk):
@@ -41,8 +72,20 @@ def propagate_batch(state, ker, lam, nk):
     B, N = W.shape; nl, nf, ns = ker["n_l"], ker["n_f"], ker["n_s"]; wl = ker["wl"]
     Vlr = ker["Vl"][F, S]                                    # (B,N,nl)
     lm = torch.clamp(lam(MU), min=1e-6)                      # (B,N)
-    Vl = lm[..., None] ** 2 * Vlr
-    mtil = -0.5 * Vl + lm[..., None] * ker["tilt"][F, S]
+    # Jensen correction for freezing lambda at the component MEAN (JENSEN=0 disables). lambda is
+    # log-linear in z, so against a Gaussian component of width SG the exact intra-component averages
+    # are lambda(MU)*exp(c1^2 SG^2/2) and lambda(MU)^2*exp(2 c1^2 SG^2). Without it the injected
+    # variance is understated by ~23% by step 13 and the error grows monotonically with step count.
+    # Exact only where lev_torch's clamps do not bind (|MU| <= zmax, lambda inside `safety`).
+    c1 = getattr(lam, "c1", 0.0) if _JENSEN else 0.0
+    if c1:
+        m = getattr(lam, "zmax", 0.0)
+        lv = lm ** 2 * _clamped_ratio(2.0 * c1, MU, SG, m)   # E[lambda^2] / lambda(MU)^2
+        lt = lm * _clamped_ratio(c1, MU, SG, m)              # E[lambda]   / lambda(MU)
+    else:
+        lv, lt = lm ** 2, lm
+    Vl = lv[..., None] * Vlr
+    mtil = -0.5 * Vl + lt[..., None] * ker["tilt"][F, S]
     A = torch.log((wl * torch.exp(mtil + 0.5 * Vl)).sum(-1)) # (B,N)
     Dl = mtil - A[..., None]                                 # (B,N,nl)
     mu_c = MU[..., None] + Dl                                # (B,N,nl)

@@ -1,0 +1,123 @@
+{
+ "date": "2020-06-01",
+ "device": "mps",
+ "vovlev": 1,
+ "backend": "kernel_fast",
+ "seed": "ts",
+ "theta": {
+  "nu_f": 1.6412884278067577,
+  "nu_s": 0.05139599090958589,
+  "nu_l": 1.5483238195775801,
+  "lam_skew": -0.1112816550072905,
+  "rho_f": 0.39584817020659335,
+  "rho_s": 9.999996757298105e-10,
+  "kap_f": 0.38200860406636195,
+  "kap_s": 0.6428204274920588
+ },
+ "kap_s": 0.6428204274920588,
+ "kap_s_fitted": true,
+ "cost": 0.0327061760165989,
+ "ftol": 1e-06,
+ "xtol": 1e-06,
+ "vovlamten": "avg",
+ "ladder": 42,
+ "lam": {
+  "smooth": 0,
+  "keep": 0,
+  "slope_only": false,
+  "sg": 0,
+  "sgdeg": 2,
+  "nofreeze": false,
+  "dsg": 0,
+  "dsgdeg": 2,
+  "h": 1.0,
+  "pillaraware": true,
+  "dates": null,
+  "applied": null
+ },
+ "vixfix": true,
+ "blend": "linear",
+ "noridge": null,
+ "box": "nu_l=0.1,3.0",
+ "xscale": null,
+ "seed0": null,
+ "monopen": null,
+ "monogate": null,
+ "ssr": [
+  1.7987734079360962,
+  1.6155922412872314,
+  1.564292550086975,
+  1.5426609516143799,
+  1.4683115482330322
+ ],
+ "ssr_target": [
+  1.815001646155162,
+  1.6064329406706688,
+  1.498971636053418,
+  1.5509547454169061,
+  1.5513153655173717
+ ],
+ "vov": [
+  1.1436518430709839,
+  1.1806517839431763,
+  1.1434993743896484,
+  1.1084349155426025,
+  0.9965440034866333,
+  0.9418935179710388,
+  0.9291474223136902,
+  0.8742841482162476,
+  0.7885684370994568
+ ],
+ "vov_target": [
+  1.2232823846579168,
+  1.1647915382678342,
+  1.134163307798428,
+  1.112374369729753,
+  1.0026433496156093,
+  0.9046195475780179,
+  0.8280186501050711,
+  0.7249187077756817,
+  0.7106010944404573
+ ],
+ "ssr_rms": 3.1314054540072673,
+ "vov_rms": 9.16802174845492,
+ "wall": 323.94156885147095,
+ "nfev": 27,
+ "njev": 16,
+ "status": 3,
+ "ticker": "SPX",
+ "vov_tenor_d": [
+  10.0,
+  17.0,
+  24.0,
+  31.0,
+  52.0,
+  80.0,
+  108.0,
+  143.0,
+  171.0
+ ],
+ "_provenance": {
+  "method": "reconstructed 2026-08-12 from vix_readout.data_vix(date)",
+  "vov_target_source": "VIX ATM option IV per expiry, dte>=7",
+  "ssr_target_source": "corrected_targets.json['SPX'][year]['corrected']",
+  "verified": "vov_tenor_d written ONLY where the recomputed IVs reproduce the stored vov_target to rtol=1e-6",
+  "note": "ticker/vov_tenor_d were not recorded at fit time. SPX targets need no cache: the vov side is a deterministic function of the daily file."
+ },
+ "sbar": [
+  -0.7572481632232666,
+  -0.7573714852333069,
+  -0.686981201171875,
+  -0.6016014814376831,
+  -0.5581939220428467
+ ],
+ "sbar_min": 0.5581939220428467,
+ "_sbar_provenance": {
+  "method": "recomputed 2026-08-13 from the record's own theta, not copied",
+  "ladder": "stage 1 (cold)",
+  "ladder_verified_by": "emit_manifest.py (bit-exact on device)",
+  "device": "mps",
+  "cross_check_vs_manifest_max_abs_diff": 4.8e-05,
+  "note": "`sbar` is the pi-weighted average ATM skew per SSR tenor -- the denominator of the SSR readout. Recorded so the nondegeneracy hypothesis of the readout-regularity proposition is verifiable per fit rather than assumed."
+ }
+}

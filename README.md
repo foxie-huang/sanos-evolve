@@ -5,8 +5,14 @@ the manuscript, the figures, and the calibration/evaluation code behind the empi
 
 ## Paper
 
-This is a **working paper** (comments welcome). The compiled manuscript is in this repository:
-[`disc_SLV_v2.pdf`](disc_SLV_v2.pdf), with source in [`disc_SLV_v2.tex`](disc_SLV_v2.tex).
+This is a **working paper** (comments welcome). The current version is
+[`disc_SLV_v3.pdf`](disc_SLV_v3.pdf) (source [`disc_SLV_v3.tex`](disc_SLV_v3.tex)); the previous
+version [`disc_SLV_v2.pdf`](disc_SLV_v2.pdf) is kept for reference.
+
+**v3 is a substantial revision, not an increment.** The carried volatility factors are continuous
+AR(1) processes with a closed-form k-step law, where v2 discretised them onto a node ladder; the
+readouts, the leverage overlay and the admissibility claims were rewritten to match what the code
+does. Results in v2 should not be compared term-by-term with v3.
 
 ## What the model is
 
@@ -23,7 +29,10 @@ stays portable across underlyings. SPX is the worked example.
 Everything lives at the repository root:
 
 ```
-disc_SLV_v2.tex, .pdf   manuscript (source + compiled)
+disc_SLV_v3.tex, .pdf   manuscript, current version (source + compiled)
+disc_SLV_v2.tex, .pdf   manuscript, previous version
+figs_v3/                figures for v3
+v3/                     the v3 engine — see below
 ssr_forecast_*.md       method notes (SSR-forecast test design + findings)
 scripts/                out-of-sample harness — ssr_forecast_eval.py (Newey–West HAC / Diebold–Mariano /
                         encompassing), wire_orats.py (real-data run), hullwhite.py (cross-strike
@@ -33,8 +42,28 @@ data/                   calibration + empirical — calibrate_joint_torch.py (tw
                         empirical_ssr.py / orats_loader.py (ORATS readers), generate_figs.py,
                         hedging_backtest.py (SSR-consistent hedging replay), vix_*.py diagnostics
 poc/                    core model engine (SANOS LP, discrete-SLV kernel, VIX readout)
-figs/                   manuscript figures
+figs/                   manuscript figures (v2)
 ```
+
+### The v3 engine
+
+`v3/` holds exactly what the v3 paper uses — the import closure of its five entry points, not the
+whole working tree:
+
+```
+v3/kernel_fast/         the production path: consts, fkernel, propagate, readouts, vix, refit
+v3/diagnostics/         emit_jacobian_table.py (Table 12), leverage_remainder.py (the finite-step
+                        leverage diagnostic), kernel_hedge_test.py (the smile-roll replay)
+v3/figures/             the scripts that generate the paper's figures
+v3/artifacts/           manifest.json (every production constant + a per-record fingerprint and
+                        reproduction check), the readout-Jacobian spectrum, the leverage-remainder
+                        summaries
+v3/artifacts/records/   the 18 shipped fit records (9 SPX, 9 NDX) behind every reported number
+```
+
+Two entry points need the option chains and cannot be run from this repository alone:
+`v3/kernel_fast/refit.py` (it calibrates against them) and `v3/diagnostics/kernel_hedge_test.py`
+(it replays a rolling SPX option position). The other three run against the artifacts shipped here.
 
 ## Data
 
@@ -76,6 +105,7 @@ The bibliography is inline (`thebibliography`), so no `.bib` is needed; figures 
 ## License
 
 The **code** (the Python scripts under `scripts/`, `data/`, and `poc/`) is released under the
-**MIT License** — see [`LICENSE`](LICENSE). The **manuscript and figures** (`disc_SLV_v2.tex`,
-`disc_SLV_v2.pdf`, `figs/`) are © the author, all rights reserved, and are **not** covered by the
+**MIT License** — see [`LICENSE`](LICENSE). The **manuscripts and figures** (`disc_SLV_v3.tex`,
+`disc_SLV_v3.pdf`, `figs_v3/`, `disc_SLV_v2.tex`, `disc_SLV_v2.pdf`, `figs/`) are © the author, all
+rights reserved, and are **not** covered by the
 MIT License.

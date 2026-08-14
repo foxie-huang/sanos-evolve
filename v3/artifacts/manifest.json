@@ -1,0 +1,475 @@
+{
+ "generated_from": "v3_scripts/kernel_fast/emit_manifest.py (values read from the code)",
+ "software": {
+  "python": "3.14.0",
+  "torch": "2.10.0",
+  "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+  "device": "mps"
+ },
+ "quadrature_and_recompression": {
+  "n_l": 5,
+  "n_x": 3,
+  "n_p": 5,
+  "na": 5,
+  "nb": 5,
+  "ne": 3,
+  "Q": 5,
+  "nq": 7,
+  "q_vix": 5,
+  "nk": 16,
+  "nz": 9,
+  "nb_f": 5,
+  "nb_s": 3,
+  "zmax": 0.12,
+  "dt": 0.019230769230769232,
+  "NS_weeks": [
+   1,
+   2,
+   4,
+   8,
+   13
+  ],
+  "nc": 240
+ },
+ "parameters": {
+  "names": [
+   "nu_f",
+   "nu_s",
+   "nu_l",
+   "lam_skew",
+   "rho_f",
+   "rho_s",
+   "kap_f",
+   "kap_s"
+  ],
+  "box": {
+   "nu_f": [
+    0.05,
+    3.0
+   ],
+   "nu_s": [
+    0.05,
+    3.0
+   ],
+   "nu_l": [
+    0.1,
+    3.0
+   ],
+   "lam_skew": [
+    -3.0,
+    0.0
+   ],
+   "rho_f": [
+    0.0,
+    0.99
+   ],
+   "rho_s": [
+    0.0,
+    0.99
+   ],
+   "kap_f": [
+    0.05,
+    0.995
+   ],
+   "kap_s": [
+    0.5,
+    0.998
+   ]
+  },
+  "pinned": {
+   "rho_s": 0.0
+  },
+  "solved_not_fitted": [
+   "gbar"
+  ]
+ },
+ "objective": {
+  "w_vov": 0.8,
+  "ftol": 1e-06,
+  "xtol": 1e-06,
+  "max_nfev": 40,
+  "ridge": {
+   "weights": {
+    "nu_f": 0.03,
+    "nu_s": 0.03,
+    "nu_l": 0.03,
+    "lam_skew": 0.03,
+    "rho_f": 0.15,
+    "rho_s": 0.15,
+    "kap_f": 0.15,
+    "kap_s": 0.15
+   },
+   "floor_eps": 0.1,
+   "anchor": "the current stage's own starting point",
+   "form": "varrho_k (theta_k - theta0_k) / max(|theta0_k|, eps)"
+  },
+  "blend": "linear"
+ },
+ "clamps": {
+  "log_variance": [
+   -40.0,
+   12.0
+  ],
+  "leverage_floor": 1e-06,
+  "variance_floor": 1e-16
+ },
+ "determinism": {
+  "rng": "none -- quadrature and optimiser are deterministic; no seeded sampling",
+  "starting_point": "fixed cold vector, then stage 1's optimum",
+  "calendar_interpolation": "linear in T (BLEND)",
+  "VIXFIX": true,
+  "VOVLAMTEN": "avg",
+  "SEW": {
+   "SPX": false,
+   "NDX": true
+  },
+  "dtype": "float32",
+  "device_sensitive": true
+ },
+ "other_production_constants": {
+  "DEV": "mps",
+  "KAPS_FREE": "0",
+  "MONOPEN": 0.0,
+  "MONOGATE": "0",
+  "TICKER": "SPX",
+  "VOVMNY": "0",
+  "VOVMNYLEVEL": "0"
+ },
+ "protocol": {
+  "stage 1": {
+   "seed": "cold",
+   "LAMH": "1.0",
+   "LADDER": 42,
+   "VOVLEV": 1,
+   "VOVLAMTEN": "avg",
+   "PIN": "rho_s=0",
+   "KAPS_FREE": 1,
+   "BOX": "nu_l=0.1,3.0"
+  },
+  "stage 2": {
+   "seed": "warm from stage 1",
+   "LAMH": "4.0",
+   "PILLARAWARE": "0",
+   "accept_if": "data cost lower"
+  }
+ },
+ "spx_dates": [
+  {
+   "date": "2012-06-01",
+   "tag": "_dw9",
+   "ladder": "stage 2 (mollified)",
+   "agrees": true,
+   "deviation_pct": 0.0,
+   "alternative_ladder_deviation_pct": 6.23,
+   "bit_exact": true,
+   "sbar": [
+    -1.1627,
+    -0.9712,
+    -0.8044,
+    -0.6624,
+    -0.5624
+   ],
+   "sbar_min": 0.5624,
+   "wall_s": 83.8,
+   "nfev": 13,
+   "njev": 4,
+   "device": "mps",
+   "sha": "bff6c6bb50a6"
+  },
+  {
+   "date": "2016-06-01",
+   "tag": "_dw9",
+   "ladder": "stage 2 (mollified)",
+   "agrees": true,
+   "deviation_pct": 0.0,
+   "alternative_ladder_deviation_pct": 3.44,
+   "bit_exact": true,
+   "sbar": [
+    -0.4144,
+    -0.448,
+    -0.502,
+    -0.5295,
+    -0.521
+   ],
+   "sbar_min": 0.4144,
+   "wall_s": 101.2,
+   "nfev": 15,
+   "njev": 5,
+   "device": "mps",
+   "sha": "0149fb8ac966"
+  },
+  {
+   "date": "2017-06-01",
+   "tag": "_dw9",
+   "ladder": "stage 2 (mollified)",
+   "agrees": true,
+   "deviation_pct": 0.0,
+   "alternative_ladder_deviation_pct": 9.83,
+   "bit_exact": true,
+   "sbar": [
+    -0.294,
+    -0.3663,
+    -0.4588,
+    -0.5187,
+    -0.515
+   ],
+   "sbar_min": 0.294,
+   "wall_s": 141.4,
+   "nfev": 16,
+   "njev": 7,
+   "device": "mps",
+   "sha": "e7efa024f26f"
+  },
+  {
+   "date": "2018-06-01",
+   "tag": "_dw9",
+   "ladder": "stage 2 (mollified)",
+   "agrees": true,
+   "deviation_pct": 0.0,
+   "alternative_ladder_deviation_pct": 8.6,
+   "bit_exact": true,
+   "sbar": [
+    -0.2405,
+    -0.2726,
+    -0.3489,
+    -0.4007,
+    -0.4323
+   ],
+   "sbar_min": 0.2405,
+   "wall_s": 171.0,
+   "nfev": 19,
+   "njev": 9,
+   "device": "mps",
+   "sha": "12be5c9f6a1d"
+  },
+  {
+   "date": "2019-06-03",
+   "tag": "_n9",
+   "ladder": "stage 1 (cold)",
+   "agrees": true,
+   "deviation_pct": 0.0,
+   "alternative_ladder_deviation_pct": 10.75,
+   "bit_exact": true,
+   "sbar": [
+    -0.5544,
+    -0.5496,
+    -0.5374,
+    -0.4944,
+    -0.465
+   ],
+   "sbar_min": 0.465,
+   "wall_s": 272.2,
+   "nfev": 22,
+   "njev": 12,
+   "device": "mps",
+   "sha": "796ce0437688"
+  },
+  {
+   "date": "2020-06-01",
+   "tag": "_n9",
+   "ladder": "stage 1 (cold)",
+   "agrees": true,
+   "deviation_pct": 0.0,
+   "alternative_ladder_deviation_pct": 1.3,
+   "bit_exact": true,
+   "sbar": [
+    -0.7572,
+    -0.7574,
+    -0.687,
+    -0.6016,
+    -0.5582
+   ],
+   "sbar_min": 0.5582,
+   "wall_s": 323.9,
+   "nfev": 27,
+   "njev": 16,
+   "device": "mps",
+   "sha": "9cc146e3ccea"
+  },
+  {
+   "date": "2021-06-01",
+   "tag": "_n9",
+   "ladder": "stage 1 (cold)",
+   "agrees": true,
+   "deviation_pct": 0.0,
+   "alternative_ladder_deviation_pct": 16.48,
+   "bit_exact": true,
+   "sbar": [
+    -0.7754,
+    -0.8055,
+    -0.7708,
+    -0.6561,
+    -0.5769
+   ],
+   "sbar_min": 0.5769,
+   "wall_s": 188.8,
+   "nfev": 15,
+   "njev": 8,
+   "device": "mps",
+   "sha": "5589f26ce66f"
+  },
+  {
+   "date": "2022-06-01",
+   "tag": "_n9",
+   "ladder": "stage 1 (cold)",
+   "agrees": true,
+   "deviation_pct": 0.0,
+   "alternative_ladder_deviation_pct": 6.27,
+   "bit_exact": true,
+   "sbar": [
+    -0.3877,
+    -0.4095,
+    -0.4016,
+    -0.4009,
+    -0.4019
+   ],
+   "sbar_min": 0.3877,
+   "wall_s": 230.0,
+   "nfev": 20,
+   "njev": 9,
+   "device": "mps",
+   "sha": "d27fd38276f4"
+  },
+  {
+   "date": "2024-06-03",
+   "tag": "_n9",
+   "ladder": "stage 1 (cold)",
+   "agrees": true,
+   "deviation_pct": 0.0,
+   "alternative_ladder_deviation_pct": 14.72,
+   "bit_exact": true,
+   "sbar": [
+    -0.3421,
+    -0.3415,
+    -0.3657,
+    -0.3508,
+    -0.3396
+   ],
+   "sbar_min": 0.3396,
+   "wall_s": 206.7,
+   "nfev": 21,
+   "njev": 9,
+   "device": "mps",
+   "sha": "9cefd849c2e2"
+  }
+ ],
+ "ndx_dates": [
+  {
+   "date": "2012-06-01",
+   "tag": "_c9",
+   "ticker": "NDX",
+   "ladder": "stage 1 (cold)",
+   "deviation_pct": 0.0,
+   "sew": true,
+   "wall_s": 210.1,
+   "nfev": 21,
+   "njev": 10,
+   "device": "mps",
+   "sha": "ae2d8501357f"
+  },
+  {
+   "date": "2016-06-01",
+   "tag": "_c9",
+   "ticker": "NDX",
+   "ladder": "stage 1 (cold)",
+   "deviation_pct": 0.0,
+   "sew": true,
+   "wall_s": 277.3,
+   "nfev": 28,
+   "njev": 14,
+   "device": "mps",
+   "sha": "24dca6728059"
+  },
+  {
+   "date": "2017-06-01",
+   "tag": "_c9",
+   "ticker": "NDX",
+   "ladder": "stage 1 (cold)",
+   "deviation_pct": 0.0,
+   "sew": true,
+   "wall_s": 362.4,
+   "nfev": 30,
+   "njev": 19,
+   "device": "mps",
+   "sha": "cbb2a872178d"
+  },
+  {
+   "date": "2018-06-01",
+   "tag": "_c9",
+   "ticker": "NDX",
+   "ladder": "stage 1 (cold)",
+   "deviation_pct": 0.0,
+   "sew": true,
+   "wall_s": 223.5,
+   "nfev": 23,
+   "njev": 11,
+   "device": "mps",
+   "sha": "f7bb4330d2ac"
+  },
+  {
+   "date": "2019-06-03",
+   "tag": "_c9",
+   "ticker": "NDX",
+   "ladder": "stage 1 (cold)",
+   "deviation_pct": 0.0,
+   "sew": true,
+   "wall_s": 222.2,
+   "nfev": 21,
+   "njev": 11,
+   "device": "mps",
+   "sha": "072f538ac73e"
+  },
+  {
+   "date": "2020-06-01",
+   "tag": "_c9",
+   "ticker": "NDX",
+   "ladder": "stage 1 (cold)",
+   "deviation_pct": 0.0,
+   "sew": true,
+   "wall_s": 150.7,
+   "nfev": 16,
+   "njev": 7,
+   "device": "mps",
+   "sha": "f794b944d9dd"
+  },
+  {
+   "date": "2021-06-01",
+   "tag": "_c9",
+   "ticker": "NDX",
+   "ladder": "stage 1 (cold)",
+   "deviation_pct": 0.0,
+   "sew": true,
+   "wall_s": 327.5,
+   "nfev": 27,
+   "njev": 16,
+   "device": "mps",
+   "sha": "7de182a95b67"
+  },
+  {
+   "date": "2022-06-01",
+   "tag": "_c9",
+   "ticker": "NDX",
+   "ladder": "stage 1 (cold)",
+   "deviation_pct": 0.0,
+   "sew": true,
+   "wall_s": 266.1,
+   "nfev": 28,
+   "njev": 13,
+   "device": "mps",
+   "sha": "44f775ae1133"
+  },
+  {
+   "date": "2024-06-03",
+   "tag": "_c9",
+   "ticker": "NDX",
+   "ladder": "stage 1 (cold)",
+   "deviation_pct": 0.0,
+   "sew": true,
+   "wall_s": 321.3,
+   "nfev": 28,
+   "njev": 16,
+   "device": "mps",
+   "sha": "d6fa5d9d7d67"
+  }
+ ]
+}
