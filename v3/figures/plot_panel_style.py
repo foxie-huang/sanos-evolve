@@ -32,10 +32,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-import sys
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import _paths as _P                                              # noqa: E402
-D = _P.DATA
+D = os.environ.get("SANOS_DATA") or os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "artifacts"))
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--panel", default="panel_ref_SPX.json")
@@ -129,7 +126,7 @@ def grid(kind, fname, suptitle):
                   else f"{r['ssr_rms']:.1f}%")
             _rb = "  [robust-$\\beta$]" if yr in _EST else ""
             ax.set_title(f"{yr}  {REG.get(yr,'')}{tag(yr)}{_rb}\nSSR RMS  {_r}   "
-                         f"floor {JH[yr]['floor_joint']:.1f}%", fontsize=8)
+                         f"target s.e. {JH[yr]['floor_joint']:.1f}%", fontsize=8)
             _all = np.concatenate([m, c]) if c is not None else m
             lo = min(tgt.min() - se.max(), _all.min()) - 0.15
             hi = max(tgt.max() + se.max(), _all.max()) + 0.15
@@ -173,7 +170,12 @@ def grid(kind, fname, suptitle):
             ax.set_title(f"{yr}  {REG.get(yr,'')}{tag(yr)}\nvov RMS  {_r}", fontsize=8)
         if ax is axes.flat[0]:
             ax.legend(frameon=False, fontsize=6.5 if A.compare else 7, loc="upper right")
-    fig.supylabel("SSR" if kind == "ssr" else r"vol-of-vol  $\xi$", fontsize=10)
+    # NOT "vol-of-vol": on SPX this axis is the VIX ATM implied volatility, which is the
+    # observation the forward-variance block actually reads. Off index the same slot holds the
+    # corrected realised strip, so the axis is labelled per ticker.
+    fig.supylabel("SSR" if kind == "ssr"
+                  else (r"VIX ATM implied vol  $\xi$" if _TK == "SPX"
+                        else r"realised fwd-var  $\xi$"), fontsize=10)
     fig.suptitle(suptitle, fontsize=11, y=0.995)
     fig.tight_layout(rect=[0.01, 0, 1, 0.99])
     p = os.path.join(OUT, fname)
@@ -184,7 +186,9 @@ def grid(kind, fname, suptitle):
               f"different estimators; panel flagged robust-beta, band is the OLS one.")
 
 
-BASE = r"VOVLEV=1, $\lambda$ avg, ladder 42, $\rho_S{=}0$"
+# The suptitle is for a reader of the paper, not a reader of the shell history: the operative
+# configuration lives in the replication manifest, so name the panel rather than the env flags.
+BASE = r"nine SPX regimes, shipped two-stage fits"
 if A.vovcurve:
     # NOT "ladder 56": the vov curve's reach is a property of the run that built --vovcurve, which
     # this script cannot see. Stating it here printed "ladder 56" over curves built at LADDER=42.
@@ -194,6 +198,10 @@ if A.note:
     BASE += ", " + A.note
 _ssr = f"{A.prefix}_ssr.png" if A.prefix else "ref_ssr_v2style.png"
 _vov = f"{A.prefix}_vov.png" if A.prefix else "ref_vov_v2style.png"
-_VL = "VIX vol-of-vol" if _TK == "SPX" else "own-strip vol-of-vol"
+# Name the OBSERVATION, not the concept: on SPX the panel is the VIX ATM implied-volatility term
+# structure; off index it is the corrected realised forward-variance strip. "vol-of-vol" named
+# neither and contradicted the manuscript's own caption.
+_VL = ("VIX ATM implied-volatility term structure" if _TK == "SPX"
+       else "corrected realised forward-variance strip")
 grid("ssr", _ssr, _TK + r" realised SSR term structure ($\pm$joint HAC) vs model — " + BASE)
 grid("vov", _vov, f"{_TK} {_VL} vs model — " + BASE)

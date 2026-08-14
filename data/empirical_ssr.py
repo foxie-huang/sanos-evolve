@@ -71,7 +71,22 @@ def empirical_ssr(paths, ns=NS, dt=DT, ticker="SPX"):
     spots = np.array([r[0] for r in rows]); vols = np.vstack([r[1] for r in rows]); sks = np.vstack([r[2] for r in rows])
     ret = np.diff(np.log(spots))                        # daily log spot return
     dvol = np.diff(vols, axis=0)                         # daily ATM-vol change per maturity
-    ssr = np.array([np.cov(dvol[:, j], ret)[0, 1] / np.var(ret) / np.mean(sks[:, j]) for j in range(len(ns))])
+    # DATA FILTER, two rules, per maturity (only bite where corruption exists; clean data -> unchanged):
+    #  (1) POSITIVE-SKEW day: an index smile is always NEGATIVE-skew, so a positive fitted ATM skew = corrupt
+    #      short-dated quadratic (thin options; e.g. 2016-01-15 skew +1.13). Drop the day.
+    #  (2) INVERTED SHORT END: a thin-weekly interpolation artifact prints an absurd short-dated ATM vol (e.g.
+    #      NDX 2017-10-27 1wk vol 31% = 2.5x the 1m on a calm rally day; skew NEGATIVE so rule (1) misses it).
+    #      These anti-leverage vol-spikes dragged NDX 2012/16/17 1wk SSR to 0.75-1.02 (true ~1.5-1.75). Flag a
+    #      SHORT maturity whose ATM vol exceeds 1.5x the 1m ATM vol. (Real crashes lift the whole curve, so the
+    #      1wk/1m ratio stays <1.5; the artifact is an ISOLATED short-end spike.) Liquid SPX -> essentially no hits.
+    ref = min(2, len(ns) - 1)                           # index of the 1m maturity (the short-end reference)
+    ssr = np.empty(len(ns))
+    for j in range(len(ns)):
+        bad = sks[:, j] > 0.0                           # rule (1)
+        if j < ref:                                     # rule (2): only the short maturities (1wk, 2wk)
+            bad = bad | (vols[:, j] > 1.5 * vols[:, ref])
+        keep = (~bad[:-1]) & (~bad[1:])                 # exclude any daily change touching a bad day
+        ssr[j] = np.cov(dvol[keep, j], ret[keep])[0, 1] / np.var(ret[keep]) / np.mean(sks[~bad, j])
     return ssr, len(rows)
 
 

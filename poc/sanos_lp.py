@@ -18,6 +18,9 @@ from discslv import bs_call, bs_implied_vol
 
 DATA = os.path.join(os.path.dirname(__file__), "..", "data", "options_SPX.csv")
 ETA = 0.25     # SANOS smoothness: component variance = ETA * ATM variance (paper default 0.25)
+LIQ = 100      # liquidity floor: >=100 lots traded or held (Buehler-Horvath SPX default)
+LIQ_FALLBACK = None   # if set (e.g. 1) and the >=LIQ set has <LIQ_MIN strikes, relax to this floor (thin index weeklies)
+LIQ_MIN = 20   # min strikes before the fallback engages
 
 
 def forward(df_e):
@@ -46,21 +49,25 @@ def prep_expiry(df_e):
     F = forward(df_e); tau = float(df_e.dte.iloc[0]) / 365.0
     has_vol = "volume" in df_e.columns; has_oi = "oi" in df_e.columns
     has_band = "ivBid" in df_e.columns and "ivAsk" in df_e.columns
-    rows = []
+    cand = []
     for _, r in df_e.iterrows():
         otm = (r.type == "call" and r.strike >= F) or (r.type == "put" and r.strike < F)
         if not (otm and r.bid > 0 and r.ask > r.bid and np.isfinite(r.impliedVolatility) and 0.02 < r.impliedVolatility < 1.5):
             continue
-        if has_vol or has_oi:                                                  # adaptive liquidity: traded OR held
-            vol_ok = has_vol and np.isfinite(r.volume) and r.volume >= 100      # front-month: >=100 lots traded (SANOS)
-            oi_ok = has_oi and np.isfinite(r.oi) and r.oi >= 100                # back-month: >=100 open interest (SPX liquid by OI)
-            if not (vol_ok or oi_ok):
-                continue
         ivb = iva = np.nan
         if has_band and np.isfinite(r.ivBid) and np.isfinite(r.ivAsk) and 0 < r.ivBid < r.ivAsk:
             ivb, iva = float(r.ivBid), float(r.ivAsk)
-        rows.append((float(r.strike), float(r.impliedVolatility), ivb, iva))
-    rows = sorted(set(rows))
+        v = float(r.volume) if (has_vol and np.isfinite(r.volume)) else 0.0
+        o = float(r.oi) if (has_oi and np.isfinite(r.oi)) else 0.0
+        cand.append((float(r.strike), float(r.impliedVolatility), ivb, iva, v, o))
+    cand = sorted(set(cand))
+    if has_vol or has_oi:                                                       # liquidity: traded OR held
+        strong = [c for c in cand if c[4] >= LIQ or c[5] >= LIQ]                # SANOS default: >=100 lots traded or held
+        if LIQ_FALLBACK is not None and len(strong) < LIQ_MIN:                  # thin index weeklies: relax to any live interest
+            cand = [c for c in cand if c[4] >= LIQ_FALLBACK or c[5] >= LIQ_FALLBACK]
+        else:
+            cand = strong                                                       # default path: identical to the strict >=100 filter
+    rows = [c[:4] for c in cand]
     if not rows:
         return dict(kappa=np.array([]), n=0, F=F, tau=tau, V=0.0)
     K = np.array([x[0] for x in rows]); iv = np.array([x[1] for x in rows])

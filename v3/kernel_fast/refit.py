@@ -41,6 +41,13 @@ W_VOV = float(os.environ.get("W_VOV", "0.8"))
 # (NDX 2017 only, 24.9% apart) the weight and the target come from different estimators. It is the
 # only uncertainty measure available, and using it beats assuming equal reliability.
 SEW = os.environ.get("SEW", "0") == "1"
+# HOLDOUT="1,3" drops those SSR tenor indices (0-based) from the OBJECTIVE while still reporting
+# their residual. This is the only way to give the SSR block positive residual degrees of freedom:
+# with seven free parameters against five tenors the fitted model can interpolate the point
+# estimates, so an in-sample residual is not a specification test. Weights are zeroed AFTER the
+# SEW normalisation and the survivors renormalised, so the retained block keeps its scale against
+# the forward-variance block and the two runs stay comparable.
+HOLDOUT = [int(i) for i in (os.environ.get("HOLDOUT") or "").replace(" ", "").split(",") if i != ""]
 # VOVLEV=0 uses the UNLEVERED VIX readout (lam_fns=None), i.e. the `_fk` panel's objective. Note
 # VOVLAMTEN and LADDER are then irrelevant -- the unlevered path is closed form and never touches
 # lambda -- so the frozen static payload is fine and NOFREEZE is unnecessary.
@@ -375,6 +382,16 @@ def fit(date):
         log(f"    SEW weights " + " ".join(f"{w:.3f}" for w in sew)
             + f"   (rel se " + " ".join(f"{100*r:.1f}%" for r in _rel) + ")")
 
+    if HOLDOUT:
+        if max(HOLDOUT) >= n_ssr or min(HOLDOUT) < 0:
+            raise SystemExit(f"HOLDOUT={HOLDOUT} out of range for n_ssr={n_ssr}")
+        keep = [i for i in range(n_ssr) if i not in HOLDOUT]
+        if not keep:
+            raise SystemExit("HOLDOUT would drop every SSR tenor")
+        sew[HOLDOUT] = 0.0
+        sew[keep] = sew[keep] / np.sqrt(np.mean(sew[keep] ** 2))
+        log(f"    HOLDOUT tenors {HOLDOUT} excluded from the objective; fitting on {keep}")
+
     tt = lambda a: torch.tensor(a, dtype=torch.float32, device=DEV)          # noqa: E731
     emp_d, vov_d, anc_d, rw_d = tt(emp), tt(vov_t), tt(anc), tt(rw)
     sew_d = tt(sew)
@@ -464,6 +481,16 @@ def fit(date):
     wall = time.time() - t0
     m = model(torch.tensor(r.x, dtype=torch.float32, device=DEV)).detach().cpu().numpy()
     ssr, vov = m[:n_ssr], m[n_ssr:]
+    # THE SSR DENOMINATOR at the optimum. One extra readout evaluation; see the `sbar` note below.
+    with torch.no_grad():
+        _LAM, _SIG = ctx["LT"][max(ctx["LT"])], ctx["sig_ref"]   # local to make_model otherwise
+        _th = torch.tensor(r.x, dtype=torch.float32, device=DEV)
+        _kk = kernel.build_kernel(kernel.th9(_th, kernel.solve_gbar(_th, _SIG, K), K), K)
+        _uf, _us, _PI, _za, _zb = kernel.stat_nodes(_kk)
+        _sig, _skw0 = readouts.sigma_grid(_kk, _LAM, readouts.atm_skew)
+        sbar = np.array([float((_PI * _skw0[_i]).sum()) for _i in range(len(_skw0))])
+    log(f"    s-bar (SSR denominator) " + " ".join(f"{v:+.4f}" for v in sbar)
+        + f"   min |s-bar| {np.abs(sbar).min():.4f}")
     out = dict(date=date, ticker=TICKER, device=DEV, vovlev=int(VOVLEV), backend="kernel_fast",
                seed=WARM or "ts",         # was hardcoded "ts", so warm starts recorded as cold
                theta=dict(zip(NAMES, [float(v) for v in r.x])),
@@ -517,7 +544,16 @@ def fit(date):
                # one carrying 2, and any consumer that rebuilds ctx without NDXTENORS silently pairs
                # the wrong axis with the values (this is exactly how the _t9 panel first failed).
                vov_tenor_d=[float(x) for x in ctx["vdtes"]],
-               sew=SEW, sew_w=[float(x) for x in sew],
+               sew=SEW, sew_w=[float(x) for x in sew], holdout=(HOLDOUT or None),
+               # THE SSR DENOMINATOR, recorded per tenor. `ssr_ts` returns
+               # (bn/var) / (PI * skw0[t]).sum(), so the last factor -- the pi-weighted average ATM
+               # skew -- is what the readout divides by, and the ratio diverges as it approaches
+               # zero. Proposition (dynamic-readout regularity) assumes it bounded away from zero
+               # and nothing checked that at the theta a fit actually reaches. A parameter scan
+               # between two fitted vectors found points at 0.10 where the 1wk SSR reads above 7;
+               # shipped fits sit at 0.24-1.16. Recording it makes the hypothesis verifiable per fit
+               # rather than assumed, at the cost of one extra readout evaluation.
+               sbar=[float(x) for x in sbar], sbar_min=float(np.abs(sbar).min()),
                ssr_rms=rms(ssr, CT[date[:4]]["corrected"]), vov_rms=rms(vov, vov_t),
                wall=wall, nfev=int(r.nfev), njev=int(r.njev), status=int(r.status))
     p = os.path.join(OUT, f"fit_kf{TAG}_{date}{SFX}.json")

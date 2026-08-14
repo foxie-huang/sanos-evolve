@@ -1,0 +1,47 @@
+\begin{tabular}{lll}
+\toprule
+Setting & Value & Role \\
+\midrule
+\multicolumn{3}{l}{\emph{Quadrature and recompression}} \\
+\quad $n_{\mathsf L}$ & $5$ & within-step branch nodes \\
+\quad $n_{\mathsf X}$ & $3$ & combined-factor quadrature \\
+\quad $n_{\mathsf P}$ & $5$ & price sub-abscissas of the leverage \\
+\quad $n_a$ & $5$ & stationary factor grid, fast \\
+\quad $n_b$ & $5$ & stationary factor grid, slow \\
+\quad $n_z$ & $9$ & spot-shift grid for the smile readout \\
+\quad $n_{b,\mathsf F}$ & $5$ & recompression bands, fast \\
+\quad $n_{b,\mathsf S}$ & $3$ & recompression bands, slow \\
+\quad $n_c$ & $240$ & components carried per fibre (the budget) \\
+\quad $n_q$ & $7$ & variance-index quadrature \\
+\quad $q_{\mathrm{vix}}$ & $5$ & leveraged variance-index quadrature \\
+\quad $z_{\max}$, $\Delta t$ & $0.12$, $1/52$ & readout half-width, step \\
+\quad SSR tenors (weeks) & [1, 2, 4, 8, 13] & snapshot grid \\
+\midrule
+\multicolumn{3}{l}{\emph{Parameters}} \\
+\quad free & 7 of 8 & $\rho_{\mathsf S}$ pinned at $0$ \\
+\quad solved, not fitted & $\bar\gamma$ & from~\eqref{eq:gbar} \\
+\quad $\nu_{\mathsf L}$ box & $[0.1, 3.0]$ & widened from the default \\
+\quad log-variance clamp & $[-40, 12]$ & before exponentiation; bounds $V_\ell$ \\
+\quad floors $\ell$, $V$ & $10^{-6}$, $10^{-16}$ & leverage and variance \\
+\midrule
+\multicolumn{3}{l}{\emph{Objective and optimiser}} \\
+\quad $w_{\mathrm{vov}}$ & $0.8$ & forward-variance block weight \\
+\quad $\varsigma$ & $1$ (SPX), inverse rel.\ HAC s.e.\ (NDX) & per-tenor SSR weights \\
+\quad ridge $\varrho$ & $0.03$ ($\nu,\lambda$), $0.15$ ($\rho,\kappa$) & relative, toward the stage anchor \\
+\quad ridge floor $\varepsilon$ & $0.1$ & in $\max(|\theta^0_k|,\varepsilon)$ \\
+\quad ftol, xtol & $10^{-6}$, $10^{-6}$ & least-squares stopping \\
+\quad max nfev & $40$ & per stage \\
+\midrule
+\multicolumn{3}{l}{\emph{Protocol}} \\
+\quad stage 1 & cold & LADDER $42$, VOVLEV $1$, $\lambda$ avg, PIN $\rho_{\mathsf S}{=}0$ \\
+\quad stage 2 & warm from stage 1 & LAMH $4.0$, PILLARAWARE $0$ \\
+\quad acceptance & per date & stage 2 only where its data cost is lower \\
+\quad calendar interpolation & linear in T (BLEND) & between listed expiries \\
+\quad VIXFIX, VOVLAMTEN & 1, avg & expiry expansion; $\lambda$ window rule \\
+\midrule
+\multicolumn{3}{l}{\emph{Environment and determinism}} \\
+\quad device, dtype & \textsc{mps}, float32 & readouts are device-sensitive \\
+\quad torch, python & 2.10.0, 3.14.0 & \\
+\quad random seeds & none & quadrature and optimiser are deterministic \\
+\bottomrule
+\end{tabular}
