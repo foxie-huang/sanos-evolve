@@ -1415,7 +1415,10 @@ As Section~\ref{sec:intro} sets out, the skew-stickiness block constrains coupli
 normalisation divides out most of volatility's own amplitude. This block reads the forward-variance
 distribution directly; on SPX its market observation is the VIX at-the-money implied-volatility term
 structure, entering as a softly weighted reading rather than as a jointly calibrated
-market---the object of the joint SPX--VIX literature~\cite{guyon2024fs,guo2022siam,che2026pot}.
+market---the object of the joint SPX--VIX literature~\cite{guyon2024fs,guo2022siam,che2026pot}. Closed-form expansions of the full VIX smile exist for forward variance
+models~\cite{bourgey2023weak,liao2026vix}, which find a single log-normal kernel too rigid to
+produce the market VIX skew; the block here reads only the at-the-money level, leaving the skew
+as an extension.
 
 Because the carried factors are the Gaussian \textup{AR(1)} pair of~\eqref{eq:ar1}, the $k$-step
 law of $U$ from any Gaussian state $(m,V)$ today is available in closed form, with no transition
@@ -2971,7 +2974,7 @@ of them is transcribed.}
 %=============================================================================
 {\small
 \begin{thebibliography}{99}
-\setlength{\itemsep}{1pt}
+\setlength{\itemsep}{0pt}
 %=============================================================================
 
 \bibitem{buehler2026sanos}
@@ -3092,6 +3095,13 @@ Friz, P.~K., Gatheral, J. (2024). Computing the SSR. \textit{arXiv preprint} arX
 
 \bibitem{fukasawa2026}
 Fukasawa, M. (2026). On the skew stickiness ratio. \textit{arXiv preprint} arXiv:2602.05241.
+
+\bibitem{bourgey2023weak} Bourgey, F., De Marco, S., Gobet, E. (2023). Weak approximations and VIX
+option price expansions in forward variance curve models. \textit{Quantitative Finance}, 23(9),
+1259--1283. \textsc{doi}:10.1080/14697688.2023.2227230.
+
+\bibitem{liao2026vix} Liao, Y., Agarwal, A., Bourgey, F. (2026). Implied volatility expansions for
+VIX options in forward variance models. \textit{arXiv preprint} arXiv:2604.25123.
 
 \bibitem{bourgey2024}
 Bourgey, F., De Marco, S., Delemotte, J. (2024). Smile dynamics and rough volatility.
