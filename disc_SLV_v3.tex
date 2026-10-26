@@ -366,6 +366,24 @@ such comparisons are drawn against point estimates of a windowed realised SSR ca
 band, whereas every fit here is reported against its own displayed precision scale, which is the
 target's joint-HAC standard error at every date but one (Appendix~\ref{app:hac}).
 
+\paragraph{Reachability of the kernel class.} A method that learns the surface inherits the reach of
+whatever kernel family it parametrises, and a guarantee of static admissibility says nothing about
+that reach. Amortised arbitrage-free reconstruction makes the distinction concrete:
+\cite{luo2026addmart} maps sparse quotes to the increment laws of an exponential additive
+martingale, so butterfly and calendar freeness hold for every admissible parameter by convex-order
+monotonicity. That is containment, not coverage. Independent increments force
+$\nu_{j+1}=\nu_j*\eta_{j+1}$, so reproducing a prescribed marginal chain additionally requires each
+step to be a valid deconvolution---strictly stronger than the convex order Kellerer's
+theorem~\cite{kellerer1972} needs for a martingale to exist. The attainable set is then a proper
+subset of the arbitrage-free surfaces, and the long-dated skew flattening such constructions report
+is that gap rather than an optimisation failure. Letting the fibre depend on the carried state
+restores the reach: stated in the observable coordinates themselves, finite Gaussian-mixture chains
+with state-dependent fibres attain the finite-step skew-stickiness ratio and its higher-order
+extensions to any prescribed order and accuracy, the implied-variance wings
+excepted~\cite{caohuang2026gm}. What a calibration can select is then limited by the readout rather
+than by the family, which is why the kernel of Section~\ref{sec:kernel} carries a volatility state
+rather than an unconditional increment law.
+
 \paragraph{Adjacent joint SPX--VIX calibration.} Joint SPX--VIX calibration addresses a related but
 different inverse problem. Guyon imposes SPX-smile, VIX-future and VIX-smile constraints and selects
 a minimum-relative-entropy law~\cite{guyon2024fs,guyon2025siam}; Guo, Loeper, Obl\'oj and Wang
@@ -2121,8 +2139,8 @@ Four limitations survive the empirical study, each exposed by specific evidence 
 a different kind of extension (Table~\ref{tab:limits}). The short end is the weak part of the fit,
 and the held-out test of Section~\ref{sec:heldout} measures how weak: withhold the one-week tenor
 and the model undershoots it by a median $11\%$, at seven of nine dates, while the withheld
-three-month tenor is recovered to $3\%$. The model skew-stickiness also rises to the
-$H{=}\tfrac12$ ceiling $2$ where SPX prints ${\approx}1.5$ sub-month; the conditional smile shape is
+three-month tenor is recovered to $3\%$. The model also carries the
+$H{=}\tfrac12$ short-time ceiling of $2$, where a rough kernel would give $H{+}\tfrac32$; the conditional smile shape is
 near-frozen in moneyness, responding to spot only through the regime channel; in the off-index
 steep-decay years the realised variance-of-variance falls from $30$ to $90$ days at a ratio
 ${\approx}0.4$ against the kernel's floor ${\approx}0.58$; and observationally equivalent parameter
@@ -3148,6 +3166,16 @@ Qin, H., Che, C., Yang, R., Feng, L. (2024). Robust and fast Bass local volatili
 \bibitem{huntkennedypelsser2000}
 Hunt, P., Kennedy, J., Pelsser, A. (2000). Markov-functional interest rate models.
 \textit{Finance and Stochastics}, 4(4), 391--408.
+
+\bibitem{luo2026addmart} Luo, H., Lin, S., Luo, X., Minh, A.~B., Zhang, Y., Liu, C. (2026).
+Arbitrage-free implied volatility surface reconstruction via additive martingales.
+\textit{arXiv preprint} arXiv:2610.25671.
+
+\bibitem{caohuang2026gm} Cao, Z., Huang, S. (2026). Finite Gaussian-mixture martingale kernels:
+density for projected smile-jet readouts. Working paper.
+
+\bibitem{kellerer1972} Kellerer, H.~G. (1972). Markov-Komposition und eine Anwendung auf
+Martingale. \textit{Mathematische Annalen}, 198(3), 99--122.
 
 \bibitem{vandenbergmix2026}
 van den Berg, T. (2026). Mixture-preserving, arbitrage-free interpolation for volatility-surface
